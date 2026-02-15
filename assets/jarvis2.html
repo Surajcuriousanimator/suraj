@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Jarvis Particle System - Mountain Update</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #020205; font-family: 'Courier New', sans-serif; }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: #00d2ff;
+            pointer-events: none;
+            z-index: 10;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+            text-transform: uppercase;
+        }
+        b { color: white; }
+        #video-container {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 160px;
+            height: 120px;
+            border: 1px solid #00d2ff;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+            z-index: 5;
+            transform: scaleX(-1); /* Mirror the video */
+            border-radius: 4px;
+            overflow: hidden;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+        #video-container:hover { opacity: 1; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        
+        .controls {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background: rgba(10, 20, 30, 0.6);
+            color: #00d2ff;
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        button:hover { 
+            background: rgba(0, 210, 255, 0.2); 
+            color: #fff; 
+            border-color: #00d2ff;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+        }
+        button.active { 
+            background: rgba(0, 210, 255, 0.8); 
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.6);
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div id="info">
+        System Online &nbsp;|&nbsp; 👆 <b>Index</b> (Track) &nbsp;|&nbsp; ✊ <b>Fist</b> (Implode) &nbsp;|&nbsp; 🖐 <b>Palm</b> (Explode)
+    </div>
+
+    <div id="video-container">
+        <video id="input_video"></video>
+    </div>
+
+    <div class="controls">
+        <button onclick="changeShape('random', this)">Chaos Cloud</button>
+        <button onclick="changeShape('hydrogen', this)">Hydrogen Atom</button>
+        <button onclick="changeShape('saturn', this)">Saturn Ring</button>
+        <button onclick="changeShape('heart', this)">Heart Shape</button>
+        <button onclick="changeShape('fireworks', this)">Galaxy Burst</button>
+        <button onclick="changeShape('mountain', this)">Cyber Mountain</button>
+    </div>
+
+    <script>
+        // --- 1. SETUP THREE.JS SCENE ---
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x020205, 0.002); // Distance fog
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 50;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.outputEncoding = THREE.sRGBEncoding; 
+        document.body.appendChild(renderer.domElement);
+
+        let visibleHeight, visibleWidth;
+        function updateVisibleBounds() {
+            const vFOV = THREE.MathUtils.degToRad(camera.fov);
+            visibleHeight = 2 * Math.tan(vFOV / 2) * camera.position.z;
+            visibleWidth = visibleHeight * camera.aspect;
+        }
+        updateVisibleBounds();
+
+        // --- 2. TEXTURE GENERATOR ---
+        function createSphereTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+            gradient.addColorStop(0, 'rgba(255,255,255,1)'); 
+            gradient.addColorStop(0.4, 'rgba(200,240,255,0.5)'); 
+            gradient.addColorStop(1, 'rgba(0,0,0,0)'); 
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0,0,64,64);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // --- 3. PARTICLE SYSTEM ---
+        const particleCount = 8000; // Increased count for denser mountain
+        let particlesData = [];
+        let currentShape = 'random';
+        let targetPositions = [];
+        let originalY = []; // Used to remember mountain base height
+        
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        const sizes = new Float32Array(particleCount);
+        const color1 = new THREE.Color();
+        const sphereTexture = createSphereTexture();
+
+        for (let i = 0; i < particleCount; i++) {
+            const x = (Math.random() - 0.5) * visibleWidth;
+            const y = (Math.random() - 0.5) * visibleHeight;
+            const z = (Math.random() - 0.5) * 50;
+            positions[i * 3] = x; positions[i * 3 + 1] = y; positions[i * 3 + 2] = z;
+            
+            color1.setHSL(Math.random(), 0.8, 0.5);
+            colors[i * 3] = color1.r; colors[i * 3 + 1] = color1.g; colors[i * 3 + 2] = color1.b;
+            sizes[i] = Math.random() * 0.8 + 0.1; 
+
+            particlesData.push({
+                velocity: new THREE.Vector3(0, 0, 0),
+                speed: Math.random() * 0.2 + 0.05
+            });
+            targetPositions.push(new THREE.Vector3(x, y, z));
+            originalY.push(y);
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+        const material = new THREE.PointsMaterial({
+            size: 1.2, 
+            map: sphereTexture, 
+            vertexColors: true,
+            blending: THREE.AdditiveBlending,
+            depthTest: false, 
+            transparent: true,
+            opacity: 0.85,
+        });
+
+        const particleSystem = new THREE.Points(geometry, material);
+        scene.add(particleSystem);
+
+        // --- 4. INTERACTION STATE ---
+        let handPosition = new THREE.Vector3(0, 0, 0);
+        let targetHandPosition = new THREE.Vector3(0, 0, 0);
+        let isHandDetected = false;
+        let gestureState = 'neutral'; 
+        let time = 0;
+
+        // --- 5. SHAPE GENERATORS ---
+        function changeShape(shape, btnElement) {
+            currentShape = shape;
+            document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
+            if(btnElement) btnElement.classList.add('active');
+
+            const nucleusSplit = Math.floor(particleCount * 0.15);
+
+            for (let i = 0; i < particleCount; i++) {
+                let t = i / particleCount;
+                let x, y, z;
+
+                if (shape === 'mountain') {
+                    // NEW: Mountain / Terrain Logic
+                    // Spread particles in a grid on X/Z plane
+                    const width = visibleWidth * 1.5;
+                    const depth = 60;
+                    x = (Math.random() - 0.5) * width;
+                    z = (Math.random() - 0.5) * depth;
+                    
+                    // Base elevation noise
+                    let frequency = 0.15;
+                    y = -15; // Start at bottom of screen
+                    y += Math.sin(x * frequency) * Math.cos(z * frequency) * 2;
+                    y += Math.sin(x * 0.5 + z * 0.3) * 1; // Add detail
+                    
+                } else if (shape === 'hydrogen') {
+                    if (i < nucleusSplit) {
+                        const theta = Math.random() * Math.PI * 2;
+                        const phi = Math.acos((Math.random() * 2) - 1);
+                        const r = Math.pow(Math.random(), 2) * 3; 
+                        x = r * Math.sin(phi) * Math.cos(theta);
+                        y = r * Math.sin(phi) * Math.sin(theta);
+                        z = r * Math.cos(phi);
+                    } else {
+                        const theta = Math.random() * Math.PI * 2;
+                        const phi = Math.acos((Math.random() * 2) - 1);
+                        const r = 15 + Math.random() * 12; 
+                        x = r * Math.sin(phi) * Math.cos(theta);
+                        y = r * Math.sin(phi) * Math.sin(theta);
+                        z = r * Math.cos(phi);
+                    }
+                }
+                else if (shape === 'heart') {
+                    let theta = t * Math.PI * 2 * 15;
+                    x = 1.2 * (16 * Math.pow(Math.sin(theta), 3));
+                    y = 1.2 * (13 * Math.cos(theta) - 5 * Math.cos(2 * theta) - 2 * Math.cos(3 * theta) - Math.cos(4 * theta));
+                    z = (Math.random() - 0.5) * 5;
+                } 
+                else if (shape === 'saturn') {
+                    if (i < particleCount * 0.3) {
+                        const phi = Math.acos(-1 + (2 * i) / (particleCount * 0.3));
+                        const theta = Math.sqrt((particleCount * 0.3) * Math.PI) * phi;
+                        x = 8 * Math.cos(theta) * Math.sin(phi);
+                        y = 8 * Math.sin(theta) * Math.sin(phi);
+                        z = 8 * Math.cos(phi);
+                    } else {
+                        let angle = Math.random() * Math.PI * 2;
+                        let rad = 12 + Math.random() * 12;
+                        x = rad * Math.cos(angle); y = (Math.random() - 0.5); z = rad * Math.sin(angle);
+                        let ty = y * Math.cos(0.5) - z * Math.sin(0.5); let tz = y * Math.sin(0.5) + z * Math.cos(0.5);
+                        y = ty; z = tz;
+                    }
+                } 
+                else if (shape === 'fireworks') {
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos((Math.random() * 2) - 1);
+                    const r = 40 * Math.pow(Math.random(), 0.5); 
+                    x = r * Math.sin(phi) * Math.cos(theta);
+                    y = r * Math.sin(phi) * Math.sin(theta);
+                    z = r * Math.cos(phi);
+                }
+                else { // Random
+                    x = (Math.random() - 0.5) * visibleWidth;
+                    y = (Math.random() - 0.5) * visibleHeight;
+                    z = (Math.random() - 0.5) * 40;
+                }
+                
+                targetPositions[i].set(x, y, z);
+                originalY[i] = y; // Save the base Y for the mountain logic
+            }
+        }
+
+        // --- 6. ANIMATION LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+            
+            // Smoother Hand Tracking Interpolation
+            handPosition.lerp(targetHandPosition, 0.2);
+
+            const positionsAttribute = geometry.attributes.position;
+            const colorsAttribute = geometry.attributes.color;
+            
+            // Slowly rotate the whole system unless it's the mountain (mountains shouldn't spin fast)
+            if(currentShape !== 'mountain') {
+                particleSystem.rotation.y += 0.001; 
+            } else {
+                // Gentle swaying for mountain
+                particleSystem.rotation.y = Math.sin(time * 0.2) * 0.05;
+            }
+
+            const nucleusSplit = Math.floor(particleCount * 0.15);
+
+            for (let i = 0; i < particleCount; i++) {
+                let px = positionsAttribute.getX(i);
+                let py = positionsAttribute.getY(i);
+                let pz = positionsAttribute.getZ(i);
+                
+                // Get world position of particle (accounting for group rotation)
+                let worldVec = new THREE.Vector3(px, py, pz).applyMatrix4(particleSystem.matrixWorld);
+
+                let vec = new THREE.Vector3(px, py, pz);
+                let target = targetPositions[i].clone();
+
+                // --- NEW MOUNTAIN INTERACTION LOGIC ---
+                if (currentShape === 'mountain') {
+                    // Reset to original Y (gravity)
+                    target.y = originalY[i];
+
+                    if (isHandDetected) {
+                        // Calculate horizontal distance to hand
+                        // We need to account for the particle system rotation for accurate lifting
+                        let dx = worldVec.x - handPosition.x;
+                        let dz = worldVec.z - handPosition.z;
+                        let distXZ = Math.sqrt(dx*dx + dz*dz);
+                        
+                        // Interaction Radius
+                        const radius = 12; 
+                        
+                        if (distXZ < radius) {
+                            // Calculate "Lift" force
+                            // The closer to the finger, the higher it goes
+                            let factor = (1 - distXZ / radius); // 0 to 1
+                            factor = Math.pow(factor, 2); // Non-linear falloff (smoother peak)
+                            
+                            // Target height is the hand height, blended by factor
+                            // We use soft clamping so it doesn't just snap to finger
+                            let liftHeight = handPosition.y; 
+                            
+                            // Only lift if the hand is above the ground
+                            if(liftHeight > originalY[i]) {
+                                target.y = originalY[i] + (liftHeight - originalY[i]) * factor;
+                            }
+                        }
+                    }
+                }
+                // --- EXISTING INTERACTION LOGIC ---
+                else if (isHandDetected) {
+                    let dist = worldVec.distanceTo(handPosition);
+                    
+                    if (gestureState === 'explode') {
+                        if (dist < 35) {
+                            let dir = worldVec.clone().sub(handPosition).normalize();
+                            target.add(dir.multiplyScalar(45)); 
+                        }
+                    } else if (gestureState === 'implode') {
+                        let dir = handPosition.clone().sub(worldVec).normalize();
+                        target.add(dir.multiplyScalar(8));
+                    } else { // Neutral flow
+                        if (dist < 25) {
+                           target.x += Math.cos(time * 8 + i) * 3;
+                           target.y += Math.sin(time * 8 + i) * 3;
+                        }
+                    }
+                    if(currentShape === 'random') {
+                         let dir = handPosition.clone().sub(target).normalize();
+                         target.add(dir.multiplyScalar(0.8));
+                    }
+                }
+
+                // --- PHYSICS & COLORING ---
+                // Easing towards target
+                const force = target.clone().sub(vec).multiplyScalar(particlesData[i].speed * 0.4);
+                
+                // Add noise
+                force.x += (Math.random() - 0.5) * 0.15; 
+                force.y += (Math.random() - 0.5) * 0.15; 
+                force.z += (Math.random() - 0.5) * 0.15;
+
+                vec.add(force);
+                positionsAttribute.setXYZ(i, vec.x, vec.y, vec.z);
+
+                // COLORING
+                if (currentShape === 'mountain') {
+                    // Height-based coloring: Blue/Purple at bottom, Cyan/White at peaks
+                    // Normalize height relative to expected mountain range
+                    let h = (vec.y + 15) / 30; 
+                    if (h < 0) h = 0; if (h > 1) h = 1;
+                    
+                    // Dark Blue (0.6) to Bright Cyan (0.5)
+                    color1.setHSL(0.6 - (h * 0.1), 0.8, 0.2 + h * 0.8);
+                }
+                else if (currentShape === 'hydrogen') {
+                    if (i < nucleusSplit) {
+                        color1.setHSL(0.02 + Math.random()*0.04, 1.0, 0.5); 
+                    } else {
+                        let hue = 0.55 + Math.sin(time * 1.5 + i*0.01) * 0.1;
+                        color1.setHSL(hue, 0.8, 0.5);
+                    }
+                } else {
+                    let dist = vec.distanceTo(handPosition);
+                    let hue = (0.6 + Math.sin(time * 0.5 + dist * 0.04) * 0.2); 
+                    color1.setHSL(hue, 0.9, 0.6);
+                }
+                colorsAttribute.setXYZ(i, color1.r, color1.g, color1.b);
+            }
+
+            positionsAttribute.needsUpdate = true;
+            colorsAttribute.needsUpdate = true;
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // --- 7. IMPROVED MEDIAPIPE TRACKING ---
+        const videoElement = document.getElementById('input_video');
+        
+        function onResults(results) {
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                isHandDetected = true;
+                const landmarks = results.multiHandLandmarks[0];
+                const indexTip = landmarks[8]; 
+                const wrist = landmarks[0];
+
+                // 1. IMPROVED XY MAPPING
+                // Mirror X to match user movement naturally
+                let x = (0.5 - indexTip.x) * visibleWidth;
+                let y = (0.5 - indexTip.y) * visibleHeight;
+                
+                // 2. NEW Z-DEPTH MAPPING
+                // landmarks[8].z is relative depth. Negative is closer to camera.
+                // We scale it to move the interaction point in 3D space.
+                // Multiplier 80 gives a good range between "touching screen" and "deep in space"
+                let z = -indexTip.z * 80; 
+
+                targetHandPosition.set(x, y, z);
+
+                // 3. IMPROVED GESTURE DETECTION
+                const thumbTip = landmarks[4];
+                const middleTip = landmarks[12];
+                const ringTip = landmarks[16];
+                const pinkyTip = landmarks[20];
+
+                // Calculate average distance of fingers to wrist (clenched vs open)
+                const fingers = [indexTip, middleTip, ringTip, pinkyTip];
+                let avgDist = 0;
+                fingers.forEach(f => {
+                    avgDist += Math.hypot(f.x - wrist.x, f.y - wrist.y);
+                });
+                avgDist /= 4;
+
+                if (avgDist < 0.25) gestureState = 'implode'; // Fist
+                else if (avgDist > 0.5) gestureState = 'explode'; // Wide open
+                else gestureState = 'neutral';
+
+            } else {
+                isHandDetected = false;
+                // Slowly drift hand to center if lost
+                targetHandPosition.set(0, 0, 0); 
+            }
+        }
+
+        const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
+        
+        // Optimized settings for accuracy vs performance
+        hands.setOptions({ 
+            maxNumHands: 1, 
+            modelComplexity: 1, // 0 is faster, 1 is more accurate
+            minDetectionConfidence: 0.8, // Increased for less jitter
+            minTrackingConfidence: 0.8 
+        });
+        hands.onResults(onResults);
+
+        const cameraUtils = new Camera(videoElement, {
+            onFrame: async () => { await hands.send({image: videoElement}); },
+            width: 640, height: 480
+        });
+        cameraUtils.start();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            updateVisibleBounds();
+        });
+
+        // Initialize
+        changeShape('random', document.querySelector('.controls button:first-child'));
+
+    </script>
+</body>
+</html>

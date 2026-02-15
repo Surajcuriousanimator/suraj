@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>iNote3D Pro Ultimate</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+        :root {
+            --bg-dark: #1e1e1e;
+            --bg-light: #f4f4f7;
+            --primary: #007AFF;
+            --accent: #5E5CE6;
+            --danger: #FF3B30;
+            --glass-surface-light: rgba(255, 255, 255, 0.65);
+            --glass-border-light: rgba(255, 255, 255, 0.4);
+            --glass-surface-dark: rgba(28, 28, 30, 0.75);
+            --glass-border-dark: rgba(255, 255, 255, 0.1);
+            --blur: blur(20px);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --transition: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --text-light: #1d1d1f;
+            --text-dark: #f5f5f7;
+        }
+
+        body {
+            margin: 0; overflow: hidden; font-family: 'Inter', sans-serif;
+            background: var(--bg-light); color: var(--text-light);
+            transition: background 0.5s ease, color 0.5s ease;
+            -webkit-font-smoothing: antialiased;
+        }
+        body.dark-mode { background: var(--bg-dark); color: var(--text-dark); }
+
+        #app { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; }
+        #canvas-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; outline: none; }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; }
+
+        .glass-panel {
+            pointer-events: auto;
+            background: var(--glass-surface-light);
+            backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--glass-border-light);
+            box-shadow: var(--shadow);
+            border-radius: 16px;
+            transition: all 0.3s var(--transition);
+        }
+        body.dark-mode .glass-panel { background: var(--glass-surface-dark); border-color: var(--glass-border-dark); }
+
+        .icon-btn {
+            width: 44px; height: 44px; border-radius: 12px; border: none;
+            background: transparent; color: inherit; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.1s, background 0.2s;
+        }
+        .icon-btn:hover { background: rgba(128,128,128,0.15); transform: translateY(-2px); }
+        .icon-btn:active { transform: scale(0.95); }
+        .icon-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4); }
+        .icon-btn.eraser-active { background: var(--danger); color: white; }
+        
+        .top-bar { padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+        .brand { font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 10px; padding: 8px 16px;}
+        .brand span { color: var(--primary); }
+
+        .dock-container { padding: 24px; display: flex; justify-content: center; align-items: flex-end; }
+        .dock { display: flex; gap: 8px; padding: 8px; border-radius: 20px; }
+        .dock-divider { width: 1px; background: rgba(128,128,128,0.3); margin: 0 4px; }
+
+        #draw-tools {
+            position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
+            padding: 12px; display: none; gap: 12px; align-items: center;
+            flex-direction: row; animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp { from { transform: translate(-50%, 20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+        
+        .tool-group { display: flex; flex-direction: column; gap: 4px; }
+        .tool-label { font-size: 9px; text-transform: uppercase; font-weight: 600; opacity: 0.6; letter-spacing: 0.5px; }
+
+        input[type="range"] { -webkit-appearance: none; height: 4px; background: rgba(128,128,128,0.3); border-radius: 2px; outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: var(--primary); border-radius: 50%; cursor: pointer; }
+        
+        select { border: none; background: rgba(128,128,128,0.1); padding: 4px 8px; border-radius: 6px; color: inherit; font-family: inherit; font-size: 12px; outline: none; }
+
+        .color-wrapper { position: relative; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; border: 2px solid rgba(128,128,128,0.2); }
+        input[type="color"] { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; padding: 0; margin: 0; cursor: pointer; border: none; }
+
+        .toast {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: white; padding: 8px 16px;
+            border-radius: 20px; font-size: 13px; backdrop-filter: blur(4px);
+            animation: slideDown 0.3s ease; z-index: 100;
+        }
+        @keyframes slideDown { from { transform: translate(-50%, -20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+
+        .inspector {
+            position: absolute; top: 80px; right: 24px; width: 260px;
+            padding: 20px; transform: translateX(120%); transition: transform 0.3s ease;
+        }
+        .inspector.open { transform: translateX(0); }
+        .control-row { margin-bottom: 12px; }
+        .control-row label { display: block; font-size: 11px; font-weight: 600; opacity: 0.7; margin-bottom: 6px; text-transform: uppercase; }
+        .control-row input { width: 100%; }
+
+        .annotation-marker {
+            position: absolute; width: 28px; height: 28px;
+            background: var(--primary); border: 2px solid white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 12px;
+            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 50;
+            transform: translate(-50%, -50%) scale(0);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .annotation-marker.occluded { opacity: 0.2; pointer-events: none; }
+        @keyframes popIn { to { transform: translate(-50%, -50%) scale(1); } }
+
+        .annotation-card {
+            position: absolute; width: 280px; padding: 16px; z-index: 100; display: none;
+        }
+        .card-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .sketch-canvas { width: 100%; height: 140px; background: white; border-radius: 8px; border: 1px solid #ccc; }
+
+        #tour-controls { display: none; gap: 8px; margin-top: 15px; }
+        .tour-btn { flex: 1; height: 36px; font-size: 14px; }
+
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body class="">
+
+    <div id="canvas-layer"></div>
+
+    <div id="ui-layer">
+        
+        <div class="top-bar">
+            <div class="brand glass-panel"><span>✦</span> iNote3D Pro</div>
+            <div id="toast-container"></div>
+            <div class="glass-panel" style="padding:4px; display:flex; gap:8px;">
+                <button class="icon-btn" id="btn-theme" title="Theme">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+                <button class="icon-btn" id="btn-inspector" title="Inspector">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="inspector glass-panel" id="inspector-panel">
+            <h3 style="margin:0 0 15px 0; font-size:14px;">Properties</h3>
+            <div class="control-row">
+                <label>Grid Opacity</label>
+                <input type="range" id="inp-grid" min="0" max="1" step="0.1" value="0.5">
+            </div>
+            <div class="control-row">
+                <label>Exposure</label>
+                <input type="range" id="inp-exposure" min="0" max="3" step="0.1" value="1">
+            </div>
+            <hr style="border:0; border-top:1px solid rgba(128,128,128,0.2); margin:15px 0;">
+            <div class="control-row">
+                <label>Material Roughness</label>
+                <input type="range" id="inp-rough" min="0" max="1" step="0.1" value="0.5">
+            </div>
+            <div class="control-row">
+                <label>Material Metalness</label>
+                <input type="range" id="inp-metal" min="0" max="1" step="0.1" value="0.5">
+            </div>
+            <div class="control-row" style="margin-top:15px">
+                 <button class="icon-btn active" id="btn-tour-start" style="width:100%; height:36px; font-size:12px;">Start Tour ▶</button>
+                 <div id="tour-controls">
+                    <button class="icon-btn tour-btn" id="btn-prev">◀ Prev</button>
+                    <button class="icon-btn tour-btn" id="btn-next">Next ▶</button>
+                 </div>
+            </div>
+        </div>
+
+        <div class="dock-container">
+            <div class="dock glass-panel">
+                <input type="file" id="file-upload" accept=".glb,.gltf" hidden>
+                <button class="icon-btn" onclick="document.getElementById('file-upload').click()" title="Open GLB">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                </button>
+                <div class="dock-divider"></div>
+                
+                <button class="icon-btn active" id="tool-nav" title="Navigate">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M5 9l14 0"></path><path d="M5 15l14 0"></path><path d="M11 5l0 14"></path></svg>
+                </button>
+                <button class="icon-btn" id="tool-draw" title="Sketch">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
+                </button>
+                <button class="icon-btn" id="tool-node" title="Pin Note">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                </button>
+                
+                <div class="dock-divider"></div>
+                <button class="icon-btn" id="btn-undo" title="Undo Sketch">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="draw-tools" class="glass-panel">
+            <div class="tool-group">
+                <span class="tool-label">Mode</span>
+                <select id="sel-placement">
+                    <option value="cursor">3D Cursor</option>
+                    <option value="view">View</option>
+                    <option value="surface">Surface</option>
+                </select>
+            </div>
+            <div class="dock-divider" style="height:30px; width:1px;"></div>
+            <div class="tool-group" style="align-items:center;">
+                <span class="tool-label">Color</span>
+                <div class="color-wrapper">
+                    <input type="color" id="inp-color" value="#007AFF">
+                </div>
+            </div>
+            <div class="tool-group">
+                <span class="tool-label">Alpha (Inv)</span>
+                <input type="range" id="inp-alpha" min="0" max="1" step="0.05" value="0" style="width:60px;">
+            </div>
+            <div class="tool-group">
+                <span class="tool-label">Size</span>
+                <input type="range" id="inp-size" min="1" max="30" value="4" style="width:80px;">
+            </div>
+            <div class="dock-divider" style="height:30px; width:1px;"></div>
+             <div class="tool-group" style="align-items:center;">
+                <span class="tool-label">Erase</span>
+                <button class="icon-btn" id="btn-eraser" style="width:32px; height:32px; border-radius:8px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+class App {
+    constructor() {
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        this.raycaster = new THREE.Raycaster();
+        this.pointer = new THREE.Vector2();
+        
+        this.model = null;
+        this.modelCenter = new THREE.Vector3(0,0,0); // Store center of mass
+        this.sketches = [];
+        this.annotations = [];
+        this.tool = 'nav';
+        this.isDark = false;
+        this.tourIndex = -1;
+
+        this.drawing = {
+            active: false, plane: null, ctx: null, texture: null, lastUV: null,
+            mode: 'cursor', eraser: false
+        };
+
+        this.init();
+    }
+
+    init() {
+        this.camera.position.set(5, 5, 5);
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        document.getElementById('canvas-layer').appendChild(this.renderer.domElement);
+
+        const pmrem = new THREE.PMREMGenerator(this.renderer);
+        this.scene.environment = pmrem.fromScene(new RoomEnvironment(this.renderer)).texture;
+        
+        const dl = new THREE.DirectionalLight(0xffffff, 2);
+        dl.position.set(5,10,7);
+        this.scene.add(dl);
+        this.scene.add(new THREE.AmbientLight(0xffffff, 1));
+
+        this.createInfiniteGrid();
+
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true;
+        this.setupControlsMode('nav');
+
+        window.addEventListener('resize', () => {
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.updateProjectionMatrix();
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        this.setupUI();
+        this.setupInteraction();
+        this.setupFileDrop();
+        this.setupNodes();
+        this.showToast("Welcome to iNote3D Pro");
+        
+        this.renderer.setAnimationLoop(this.render.bind(this));
+    }
+
+    createInfiniteGrid() {
+        const size = 100;
+        const geometry = new THREE.PlaneGeometry(size, size, 1, 1);
+        const material = new THREE.ShaderMaterial({
+            side: THREE.DoubleSide, transparent: true,
+            uniforms: { uColor: { value: new THREE.Color(0x888888) }, uOpacity: { value: 0.5 } },
+            vertexShader: `varying vec3 vPos; void main() { vPos = (modelMatrix * vec4(position, 1.0)).xyz; gl_Position = projectionMatrix * viewMatrix * vec4(vPos, 1.0); }`,
+            fragmentShader: `varying vec3 vPos; uniform vec3 uColor; uniform float uOpacity; void main() { vec2 coord = vPos.xz; vec2 grid = abs(fract(coord - 0.5) - 0.5) / fwidth(coord); float line = min(grid.x, grid.y); float alpha = 1.0 - min(line, 1.0); float dist = length(vPos.xz); float fade = 1.0 - smoothstep(20.0, 50.0, dist); gl_FragColor = vec4(uColor, alpha * fade * uOpacity); }`
+        });
+        this.grid = new THREE.Mesh(geometry, material);
+        this.grid.rotation.x = -Math.PI / 2;
+        this.scene.add(this.grid);
+    }
+
+    setupControlsMode(mode) {
+        // Enforce Middle=Rotate, Right=Pan in ALL modes
+        this.controls.mouseButtons.MIDDLE = THREE.MOUSE.ROTATE;
+        this.controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
+
+        if(mode === 'draw') {
+            this.controls.mouseButtons.LEFT = null; // Left reserved for drawing
+        } else {
+            this.controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE; // Standard Nav
+        }
+        this.controls.update();
+    }
+
+    setupUI() {
+        const el = (id) => document.getElementById(id);
+
+        const setTool = (t) => {
+            this.tool = t;
+            el('tool-nav').classList.toggle('active', t==='nav');
+            el('tool-draw').classList.toggle('active', t==='draw');
+            el('tool-node').classList.toggle('active', t==='node');
+            el('draw-tools').style.display = t==='draw' ? 'flex' : 'none';
+            this.setupControlsMode(t);
+        };
+        
+        el('tool-nav').onclick = () => setTool('nav');
+        el('tool-draw').onclick = () => setTool('draw');
+        el('tool-node').onclick = () => setTool('node');
+
+        el('sel-placement').onchange = (e) => this.drawing.mode = e.target.value;
+        el('btn-eraser').onclick = () => {
+            this.drawing.eraser = !this.drawing.eraser;
+            el('btn-eraser').classList.toggle('eraser-active', this.drawing.eraser);
+        };
+        el('btn-undo').onclick = () => this.undoSketch();
+
+        el('btn-inspector').onclick = () => el('inspector-panel').classList.toggle('open');
+        el('inp-grid').oninput = (e) => this.grid.material.uniforms.uOpacity.value = e.target.value;
+        el('inp-exposure').oninput = (e) => this.renderer.toneMappingExposure = e.target.value;
+        
+        // Tour Controls
+        el('btn-tour-start').onclick = () => {
+             if(!this.annotations.length) { this.showToast("No pins to tour!"); return; }
+             el('btn-tour-start').style.display = 'none';
+             el('tour-controls').style.display = 'flex';
+             this.navigateTour(1); // Start with first
+        };
+        el('btn-next').onclick = () => this.navigateTour(1);
+        el('btn-prev').onclick = () => this.navigateTour(-1);
+        
+        el('btn-theme').onclick = () => {
+            this.isDark = !this.isDark;
+            document.body.classList.toggle('dark-mode');
+            this.grid.material.uniforms.uColor.value.setHex(this.isDark ? 0x555555 : 0x888888);
+            this.scene.background = new THREE.Color(this.isDark ? 0x1e1e1e : 0xf4f4f7);
+            this.scene.fog = new THREE.FogExp2(this.isDark ? 0x1e1e1e : 0xf4f4f7, 0.02);
+        };
+
+        const updateMat = () => {
+            if(!this.model) return;
+            const r = parseFloat(el('inp-rough').value);
+            const m = parseFloat(el('inp-metal').value);
+            this.model.traverse(o => {
+                if(o.isMesh && o.material.isMeshStandardMaterial) {
+                    o.material.roughness = r;
+                    o.material.metalness = m;
+                }
+            });
+        };
+        el('inp-rough').oninput = updateMat;
+        el('inp-metal').oninput = updateMat;
+    }
+
+    setupInteraction() {
+        const cvs = this.renderer.domElement;
+        
+        cvs.addEventListener('pointerdown', (e) => {
+            if(this.tool !== 'draw' || e.button !== 0) return;
+            this.updatePointer(e);
+            this.drawing.active = true;
+            this.startSketch();
+            this.drawStroke(true); 
+        });
+
+        cvs.addEventListener('pointermove', (e) => {
+            if(!this.drawing.active) return;
+            this.updatePointer(e);
+            this.drawStroke(false);
+        });
+
+        cvs.addEventListener('pointerup', () => {
+            this.drawing.active = false;
+            this.drawing.plane = null;
+            this.drawing.ctx = null;
+            this.drawing.lastUV = null;
+        });
+    }
+
+    startSketch() {
+        const mode = this.drawing.mode;
+        let pos = new THREE.Vector3();
+        let normal = new THREE.Vector3();
+        let parent = this.scene;
+        let size = 10;
+        let didHit = false;
+
+        if(mode === 'surface') {
+            if(this.model) {
+                this.raycaster.setFromCamera(this.pointer, this.camera);
+                const hits = this.raycaster.intersectObject(this.model, true);
+                if(hits.length > 0) {
+                    pos.copy(hits[0].point).add(hits[0].face.normal.clone().multiplyScalar(0.01));
+                    normal.copy(hits[0].face.normal.transformDirection(hits[0].object.matrixWorld).normalize());
+                    parent = hits[0].object;
+                    size = this.camera.position.distanceTo(pos) * 2.5; 
+                    didHit = true;
+                }
+            }
+        } else if (mode === 'cursor') {
+            // Use model center if available
+            pos.copy(this.modelCenter); 
+            normal.subVectors(this.camera.position, pos).normalize();
+            size = this.camera.position.distanceTo(pos) * 2.5;
+            parent = this.scene;
+            didHit = true;
+        } else if (mode === 'view') {
+            const dist = 5;
+            pos.set(0, 0, -dist); 
+            normal.set(0, 0, 1);
+            size = dist * 2.5; 
+            parent = this.camera; 
+            didHit = true;
+        }
+
+        if(didHit) {
+            this.createSketchPlane(pos, normal, parent, size);
+        }
+    }
+
+    createSketchPlane(pos, normal, parent, size) {
+        const dim = 2048; 
+        const canvas = document.createElement('canvas');
+        canvas.width = dim; canvas.height = dim;
+        const ctx = canvas.getContext('2d');
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.minFilter = THREE.LinearFilter;
+
+        const mat = new THREE.MeshBasicMaterial({
+            map: texture, transparent: true, opacity: 0.99,
+            side: THREE.DoubleSide, depthWrite: false,
+            polygonOffset: true, polygonOffsetFactor: -4 
+        });
+
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(size, size), mat);
+        
+        if(parent === this.camera) {
+            plane.position.copy(pos); plane.lookAt(0,0,0); mat.depthTest = false;
+        } else {
+            plane.position.copy(pos); plane.lookAt(pos.clone().add(normal));
+        }
+
+        if(parent === this.scene) this.scene.add(plane); else parent.add(plane);
+        plane.updateMatrixWorld(true);
+        this.sketches.push(plane);
+        this.drawing.plane = plane; this.drawing.ctx = ctx; this.drawing.texture = texture;
+    }
+
+    drawStroke(isStart) {
+        if(!this.drawing.plane) return;
+        this.raycaster.setFromCamera(this.pointer, this.camera);
+        const hits = this.raycaster.intersectObject(this.drawing.plane);
+
+        if(hits.length > 0) {
+            const uv = hits[0].uv;
+            const dim = 2048;
+            const x = uv.x * dim; const y = (1 - uv.y) * dim;
+            const ctx = this.drawing.ctx;
+
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            ctx.lineWidth = document.getElementById('inp-size').value * 4; 
+            
+            if(this.drawing.eraser) {
+                ctx.globalCompositeOperation = 'destination-out';
+            } else {
+                ctx.globalCompositeOperation = 'source-over';
+                const hex = document.getElementById('inp-color').value;
+                const slider = parseFloat(document.getElementById('inp-alpha').value);
+                ctx.strokeStyle = this.hexToRgba(hex, 1.0 - slider);
+                ctx.fillStyle = ctx.strokeStyle;
+            }
+
+            if(isStart || !this.drawing.lastUV) {
+                ctx.beginPath(); ctx.arc(x, y, ctx.lineWidth/2, 0, Math.PI*2); ctx.fill();
+            } else {
+                ctx.beginPath(); ctx.moveTo(this.drawing.lastUV.x, this.drawing.lastUV.y); ctx.lineTo(x, y); ctx.stroke();
+            }
+            this.drawing.lastUV = {x, y}; this.drawing.texture.needsUpdate = true;
+        } else {
+            this.drawing.lastUV = null;
+        }
+    }
+
+    hexToRgba(hex, alpha) {
+        const r = parseInt(hex.slice(1,3), 16); const g = parseInt(hex.slice(3,5), 16); const b = parseInt(hex.slice(5,7), 16);
+        return `rgba(${r},${g},${b},${alpha})`;
+    }
+
+    undoSketch() {
+        if(this.sketches.length > 0) {
+            const p = this.sketches.pop();
+            p.parent.remove(p);
+            p.geometry.dispose(); p.material.map.dispose(); p.material.dispose();
+            this.showToast("Undo");
+        }
+    }
+
+    setupNodes() {
+        this.renderer.domElement.addEventListener('dblclick', (e) => {
+            // Double click works in any mode to add note
+            if(!this.model) return;
+            this.updatePointer(e);
+            this.raycaster.setFromCamera(this.pointer, this.camera);
+            const hits = this.raycaster.intersectObject(this.model, true);
+            if(hits.length) {
+                const node = this.createNode(hits[0].point, hits[0].face.normal);
+                // Immediately open
+                this.toggleNode(node, true);
+            }
+        });
+    }
+
+    createNode(pos, normal) {
+        const id = this.annotations.length + 1;
+        const marker = document.createElement('div');
+        marker.className = 'annotation-marker'; marker.innerText = id;
+        document.getElementById('ui-layer').appendChild(marker);
+
+        const card = document.createElement('div');
+        card.className = 'annotation-card glass-panel';
+        card.innerHTML = `
+            <div class="card-header"><strong>Note #${id}</strong><span style="cursor:pointer;" class="close">✕</span></div>
+            <input type="text" placeholder="Title..." style="width:100%; margin-bottom:8px; padding:4px; border:1px solid #ccc; border-radius:4px;">
+            <canvas class="sketch-canvas" width="246" height="140"></canvas>
+        `;
+        document.getElementById('ui-layer').appendChild(card);
+        
+        const cvs = card.querySelector('canvas');
+        const cx = cvs.getContext('2d');
+        let d = false;
+        cvs.onpointerdown = (e)=>{d=true;cx.beginPath();cx.moveTo(e.offsetX,e.offsetY);};
+        cvs.onpointermove = (e)=>{if(d){cx.lineTo(e.offsetX,e.offsetY);cx.stroke();}};
+        cvs.onpointerup = ()=>d=false;
+
+        const node = { id, pos, normal, marker, card, open: false };
+        this.annotations.push(node);
+
+        marker.onclick = (e) => { e.stopPropagation(); this.toggleNode(node); };
+        card.querySelector('.close').onclick = (e) => { e.stopPropagation(); this.toggleNode(node, false); };
+        return node;
+    }
+
+    toggleNode(node, forceState) {
+        const isOpen = forceState !== undefined ? forceState : !node.open;
+        this.annotations.forEach(n => { if(n !== node) { n.open = false; n.card.style.display = 'none'; } });
+        node.open = isOpen;
+        node.card.style.display = isOpen ? 'block' : 'none';
+        if(isOpen) this.flyTo(node.pos.clone().add(node.normal.clone().multiplyScalar(2)), node.pos);
+    }
+
+    navigateTour(dir) {
+        this.tourIndex += dir;
+        if(this.tourIndex >= this.annotations.length) this.tourIndex = 0;
+        if(this.tourIndex < 0) this.tourIndex = this.annotations.length - 1;
+        const node = this.annotations[this.tourIndex];
+        this.annotations.forEach(n => this.toggleNode(n, false));
+        // Fly then open
+        this.flyTo(node.pos.clone().add(node.normal.clone().multiplyScalar(2)), node.pos, () => {
+            this.toggleNode(node, true);
+        });
+    }
+
+    flyTo(newPos, newTarget, onComplete) {
+        const startPos = this.camera.position.clone();
+        const startTarget = this.controls.target.clone();
+        let alpha = 0;
+        const animate = () => {
+            alpha += 0.02;
+            if (alpha > 1) {
+                this.camera.position.copy(newPos);
+                this.controls.target.copy(newTarget);
+                if(onComplete) onComplete();
+                return;
+            }
+            const t = 1 - Math.pow(1 - alpha, 3);
+            this.camera.position.lerpVectors(startPos, newPos, t);
+            this.controls.target.lerpVectors(startTarget, newTarget, t);
+            requestAnimationFrame(animate);
+        };
+        animate();
+    }
+
+    updatePointer(e) {
+        this.pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+        this.pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    }
+
+    setupFileDrop() {
+        const load = (f) => {
+            const u = URL.createObjectURL(f);
+            const l = new GLTFLoader();
+            this.showToast("Loading...");
+            l.load(u, (g) => {
+                if(this.model) this.scene.remove(this.model);
+                this.model = g.scene;
+                const box = new THREE.Box3().setFromObject(this.model);
+                // Calculate and store center of mass
+                this.modelCenter = box.getCenter(new THREE.Vector3());
+                const s = box.getSize(new THREE.Vector3()).length();
+                const scale = 5 / s;
+                this.model.scale.setScalar(scale);
+                // Center model at origin
+                this.model.position.sub(this.modelCenter.multiplyScalar(scale));
+                // Recalculate center after repositioning (it will be near 0,0,0 now)
+                this.modelCenter.set(0,0,0); 
+
+                this.scene.add(this.model);
+                this.showToast("Loaded");
+            });
+        };
+        document.getElementById('file-upload').onchange = (e) => load(e.target.files[0]);
+        window.addEventListener('dragover', e=>e.preventDefault());
+        window.addEventListener('drop', e=>{e.preventDefault(); load(e.dataTransfer.files[0]);});
+    }
+
+    render() {
+        this.controls.update();
+        if(this.grid) {
+            this.grid.position.x = this.camera.position.x;
+            this.grid.position.z = this.camera.position.z;
+        }
+
+        this.annotations.forEach(node => {
+            const v = node.pos.clone().project(this.camera);
+            const x = (v.x * .5 + .5) * window.innerWidth;
+            const y = (-(v.y * .5) + .5) * window.innerHeight;
+            
+            node.marker.style.left = `${x}px`;
+            node.marker.style.top = `${y}px`;
+            if(node.open) { node.card.style.left = `${x+20}px`; node.card.style.top = `${y-50}px`; }
+
+            const dist = node.pos.distanceTo(this.camera.position);
+            this.raycaster.setFromCamera({x:v.x, y:v.y}, this.camera);
+            let occ = false;
+            if(this.model) {
+                const hits = this.raycaster.intersectObject(this.model, true);
+                if(hits.length > 0 && hits[0].distance < dist - 0.2) occ = true;
+            }
+            if(v.z > 1) occ = true;
+            node.marker.classList.toggle('occluded', occ);
+        });
+
+        this.renderer.render(this.scene, this.camera);
+    }
+
+    showToast(msg) {
+        const t = document.createElement('div');
+        t.className = 'toast'; t.innerText = msg;
+        document.getElementById('toast-container').appendChild(t);
+        setTimeout(() => t.remove(), 2500);
+    }
+}
+
+new App();
+</script>
+</body>
+</html>

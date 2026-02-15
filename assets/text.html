@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fixed Word Tunnel</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', sans-serif; }
+        
+        /* UI Panel - Fixed Z-Index to stay visible */
+        #uiPanel {
+            position: absolute;
+            top: 0; left: 0; height: 100vh; width: 350px;
+            background: rgba(12, 12, 12, 0.95);
+            border-right: 1px solid #333;
+            padding: 15px; box-sizing: border-box;
+            color: #f0f0f0; overflow-y: auto; 
+            z-index: 10000; /* Stays on top of video */
+            box-shadow: 5px 0 15px rgba(0,0,0,0.6);
+        }
+
+        h3 { margin-top: 0; font-size: 16px; color: #fff; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;}
+        
+        .control-group { margin-bottom: 15px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; border: 1px solid #333; }
+        label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 700; color: #bbb; display: flex; justify-content: space-between;}
+        
+        textarea {
+            width: 100%; height: 60px; background: #222; color: #ddd;
+            border: 1px solid #444; padding: 6px; font-family: sans-serif; font-size: 11px;
+            resize: vertical; box-sizing: border-box; border-radius: 4px;
+        }
+
+        input[type=range], select { width: 100%; margin-top: 4px; cursor: pointer; }
+        input[type=color] { width: 30px; height: 20px; border: none; padding: 0; background: none; cursor: pointer;}
+        input[type=number] { width: 80px; background: #222; border: 1px solid #444; color: white; padding: 4px; border-radius: 4px; }
+
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .row { display: flex; gap: 10px; align-items: center; }
+
+        button {
+            padding: 10px; width: 100%; cursor: pointer; font-weight: bold;
+            border: none; border-radius: 4px; font-size: 13px; transition: all 0.2s;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        
+        .icon-btn { width: auto; padding: 4px 8px; background: #333; font-size: 14px; }
+        .icon-btn:hover { background: #555; }
+
+        #btn-refresh { background: #444; color: white; margin-bottom: 5px; }
+        #btn-refresh:hover { background: #555; }
+        
+        #btn-record { background: #e74c3c; color: white; margin-top: 10px; }
+        #btn-record:hover { background: #c0392b; }
+        
+        #btn-stop { background: #27ae60; color: white; display: none; margin-top: 10px; animation: pulse 1.5s infinite;}
+        
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+<div id="uiPanel">
+    <h3>Configuration</h3>
+
+    <div class="control-group" style="border-color: #4fc3f7aa;">
+        <label>Random Seed <span style="font-weight:normal; color:#666">(Order)</span></label>
+        <div class="row">
+            <input type="number" id="seedInput" value="12345">
+            <button class="icon-btn" id="btn-rnd-seed" title="Randomize Seed">🎲</button>
+            <button id="btn-refresh" style="margin:0">Apply Seed</button>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <div class="header-row">
+            <label style="margin:0">Background</label>
+            <input type="color" id="bgColor" value="#000000">
+        </div>
+    </div>
+
+    <div class="control-group">
+        <div class="header-row">
+            <label style="margin:0">Group 1 (Countries)</label>
+            <input type="color" id="color1" value="#ff2222">
+        </div>
+        <textarea id="textGroup1">Italy, France, Portugal, Brazil, India, Turkey, USA, Mexico, Argentina, North America, South America, Latin America, Europe, Asia Pacific</textarea>
+    </div>
+
+    <div class="control-group">
+        <div class="header-row">
+            <label style="margin:0">Group 2 (Services)</label>
+            <input type="color" id="color2" value="#ffffff">
+        </div>
+        <textarea id="textGroup2">Ceramic Welding, Endoscopy, Audits, Thermography, Regenerator Cleaning, Hot Bottom Repair, Hot Tank Repair, Hot Overcoating, Anchoring, Cold Repair, Steel Structures, Glass Draining, Electrode installation, Crown Repairs, Hot Block Repairs</textarea>
+    </div>
+
+    <div class="control-group">
+        <label>Tunnel Width: <span id="spreadVal">700</span></label>
+        <input type="range" id="spreadSlider" min="200" max="1500" value="700">
+        
+        <label style="margin-top:10px">Word Count: <span id="countVal">80</span></label>
+        <input type="range" id="countSlider" min="20" max="250" value="80">
+
+        <label style="margin-top:10px; color:#4fc3f7">Anti-Overlap Spacing:</label>
+        <input type="range" id="spacingSlider" min="0" max="200" value="50">
+    </div>
+
+    <div class="control-group">
+        <label>Speed:</label>
+        <input type="range" id="speedSlider" min="2" max="40" value="15">
+    </div>
+
+    <div class="control-group">
+        <label>Video Resolution:</label>
+        <select id="resolutionSelect">
+            <option value="1280x720">1280x720 (Fast)</option>
+            <option value="1920x1080" selected>1920x1080 (HD)</option>
+            <option value="2560x1440">2560x1440 (2K)</option>
+            <option value="3840x2160">3840x2160 (4K)</option>
+        </select>
+        <button id="btn-record">Start Recording</button>
+        <button id="btn-stop">Stop & Save</button>
+    </div>
+</div>
+
+<script>
+    // --- GLOBAL RNG ---
+    let rng = Math.random; // Default
+
+    function mulberry32(a) {
+        return function() {
+          var t = a += 0x6D2B79F5;
+          t = Math.imul(t ^ t >>> 15, t | 1);
+          t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+          return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        }
+    }
+
+    // --- WORD DECK (Safety Fixed) ---
+    class WordDeck {
+        constructor(wordList) {
+            this.original = wordList.length > 0 ? [...wordList] : ["Unknown"];
+            this.deck = [];
+            this.reshuffle();
+        }
+
+        reshuffle() {
+            this.deck = [...this.original];
+            // Fisher-Yates with current RNG
+            for (let i = this.deck.length - 1; i > 0; i--) {
+                const j = Math.floor(rng() * (i + 1));
+                [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
+            }
+        }
+
+        draw() {
+            if (this.deck.length === 0) this.reshuffle();
+            return this.deck.pop();
+        }
+    }
+
+    // --- UI REFERENCES ---
+    const ui = {
+        seed: document.getElementById('seedInput'),
+        btnRndSeed: document.getElementById('btn-rnd-seed'),
+        bg: document.getElementById('bgColor'),
+        t1: document.getElementById('textGroup1'),
+        c1: document.getElementById('color1'),
+        t2: document.getElementById('textGroup2'),
+        c2: document.getElementById('color2'),
+        spread: document.getElementById('spreadSlider'),
+        count: document.getElementById('countSlider'),
+        spacing: document.getElementById('spacingSlider'),
+        speed: document.getElementById('speedSlider'),
+        res: document.getElementById('resolutionSelect'),
+        btnRef: document.getElementById('btn-refresh'),
+        btnRec: document.getElementById('btn-record'),
+        btnStop: document.getElementById('btn-stop'),
+        valSpread: document.getElementById('spreadVal'),
+        valCount: document.getElementById('countVal')
+    };
+
+    ui.spread.oninput = () => ui.valSpread.innerText = ui.spread.value;
+    ui.count.oninput = () => ui.valCount.innerText = ui.count.value;
+    
+    // Listeners
+    ui.bg.addEventListener('input', updateBackground);
+    ui.btnRef.onclick = () => initClouds();
+    ui.btnRndSeed.onclick = () => {
+        ui.seed.value = Math.floor(Math.random() * 99999);
+        initClouds();
+    };
+
+    // --- THREE.JS SETUP ---
+    const scene = new THREE.Scene();
+    const initialColor = new THREE.Color(ui.bg.value);
+    scene.fog = new THREE.Fog(initialColor, 10, 1500);
+
+    const camera = new THREE.PerspectiveCamera(65, 1, 1, 3000);
+    camera.position.z = 0;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setClearColor(initialColor);
+    
+    // Style
+    renderer.domElement.style.position = 'absolute';
+    renderer.domElement.style.right = '0';
+    renderer.domElement.style.top = '0';
+    renderer.domElement.style.zIndex = '1'; 
+    document.body.appendChild(renderer.domElement);
+
+    function resizeLayout() {
+        if (!isRecording) {
+            const w = window.innerWidth - 350;
+            const h = window.innerHeight;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+    }
+    window.addEventListener('resize', resizeLayout);
+    setTimeout(resizeLayout, 100); // Ensure init load
+
+    function updateBackground() {
+        const c = new THREE.Color(ui.bg.value);
+        renderer.setClearColor(c);
+        scene.fog.color = c;
+    }
+
+    // --- TEXTURE CACHE ---
+    const textureCache = {};
+    function getTexture(text, color) {
+        if (!text) text = "?"; // Safety for undefined
+        const key = text + "-" + color;
+        if (textureCache[key]) return textureCache[key];
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const fontSize = 100;
+        const fontFace = "Arial, sans-serif";
+        
+        ctx.font = `bold ${fontSize}px ${fontFace}`;
+        const width = ctx.measureText(text).width;
+        
+        canvas.width = width + 50;
+        canvas.height = fontSize + 50;
+        
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 25;
+        ctx.fillStyle = color;
+        ctx.font = `bold ${fontSize}px ${fontFace}`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.minFilter = THREE.LinearMipMapLinearFilter;
+        
+        const data = { texture: tex, ratio: canvas.width / canvas.height };
+        textureCache[key] = data;
+        return data;
+    }
+
+    // --- CLOUD GENERATION ---
+    let particles = [];
+    const Z_DEPTH = 2000;
+
+    function parseText(input) {
+        if(!input) return [];
+        return input.split(',').map(s => s.trim()).filter(s => s.length > 0);
+    }
+
+    function initClouds() {
+        // 1. Setup Seed
+        const seedVal = parseInt(ui.seed.value) || 12345;
+        rng = mulberry32(seedVal);
+
+        // 2. Clear Scene
+        particles.forEach(p => scene.remove(p));
+        particles = [];
+        
+        // 3. Parse Words
+        const w1 = parseText(ui.t1.value);
+        const w2 = parseText(ui.t2.value);
+        
+        // Safety: ensure default if empty
+        if (w1.length === 0 && w2.length === 0) {
+            alert("Please enter some text!");
+            return;
+        }
+
+        const deck1 = new WordDeck(w1);
+        const deck2 = new WordDeck(w2);
+
+        const count = parseInt(ui.count.value);
+        const spread = parseInt(ui.spread.value);
+        const minSpacing = parseInt(ui.spacing.value);
+
+        let failedAttempts = 0;
+        let placedCount = 0;
+
+        // Loop until we have enough words or we give up
+        while (placedCount < count && failedAttempts < 2000) {
+            
+            // Pick Deck
+            let isGroup1 = rng() > 0.5;
+            if (w1.length === 0) isGroup1 = false;
+            else if (w2.length === 0) isGroup1 = true;
+
+            const deck = isGroup1 ? deck1 : deck2;
+            const color = isGroup1 ? ui.c1.value : ui.c2.value;
+            
+            // Get position
+            const x = (rng() - 0.5) * spread;
+            const y = (rng() - 0.5) * (spread * 0.6);
+            const z = -rng() * Z_DEPTH;
+
+            // Check Collision
+            let collision = false;
+            // Only check collision if minSpacing is > 0
+            if (minSpacing > 0) {
+                for (let other of particles) {
+                    const dx = x - other.position.x;
+                    const dy = y - other.position.y;
+                    const dz = z - other.position.z;
+                    const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+                    if (dist < minSpacing) {
+                        collision = true;
+                        break;
+                    }
+                }
+            }
+
+            // If collision happens, we skip this iteration, BUT
+            // if we fail too many times, we force place it to ensure text appears.
+            if (!collision || failedAttempts > 1000) {
+                const word = deck.draw();
+                const { texture, ratio } = getTexture(word, color);
+                const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, opacity: 0.95 });
+                const sprite = new THREE.Sprite(mat);
+                
+                const baseSize = 35;
+                const size = baseSize + rng() * 20;
+                sprite.scale.set(size * ratio, size, 1);
+                sprite.position.set(x, y, z);
+                
+                scene.add(sprite);
+                particles.push(sprite);
+                placedCount++;
+            } else {
+                failedAttempts++;
+            }
+        }
+    }
+
+    // --- RECYCLING ---
+    function recycleParticle(p) {
+        const spread = parseInt(ui.spread.value);
+        p.position.z = -Z_DEPTH;
+        p.position.x = (rng() - 0.5) * spread;
+        p.position.y = (rng() - 0.5) * (spread * 0.6);
+    }
+
+    // --- ANIMATION ---
+    function animate() {
+        requestAnimationFrame(animate);
+        const speed = parseFloat(ui.speed.value);
+        particles.forEach(p => {
+            p.position.z += speed;
+            if (p.position.z > 100) recycleParticle(p);
+        });
+        renderer.render(scene, camera);
+    }
+
+    // --- RECORDING ---
+    let mediaRecorder;
+    let chunks = [];
+    let isRecording = false;
+
+    ui.btnRec.onclick = startRecording;
+    ui.btnStop.onclick = stopRecording;
+
+    function startRecording() {
+        isRecording = true;
+        initClouds(); // Restart loop for clean video
+
+        const [w, h] = ui.res.value.split('x').map(Number);
+        
+        // Fullscreen the renderer, BUT keep z-index lower than UI (10000)
+        renderer.setSize(w, h);
+        renderer.domElement.style.width = '100vw'; 
+        renderer.domElement.style.height = '100vh';
+        renderer.domElement.style.left = '0';
+        renderer.domElement.style.zIndex = '5000'; 
+        
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+
+        const stream = renderer.domElement.captureStream(30);
+        let opts = { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 8000000 };
+        // Increase bitrate for 4K
+        if (w >= 3840) opts.videoBitsPerSecond = 12000000;
+
+        try { mediaRecorder = new MediaRecorder(stream, opts); } 
+        catch (e) { mediaRecorder = new MediaRecorder(stream); }
+
+        chunks = [];
+        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+        mediaRecorder.onstop = saveVideo;
+        mediaRecorder.start();
+
+        ui.btnRec.style.display = 'none';
+        ui.btnStop.style.display = 'block';
+    }
+
+    function stopRecording() {
+        mediaRecorder.stop();
+    }
+
+    function saveVideo() {
+        const blob = new Blob(chunks, { type: 'video/mp4' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `Tunnel_Seed${ui.seed.value}.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        
+        isRecording = false;
+        
+        // Reset Styles
+        renderer.domElement.style.width = '';
+        renderer.domElement.style.height = '';
+        renderer.domElement.style.left = '';
+        renderer.domElement.style.zIndex = '1';
+        
+        resizeLayout();
+        
+        ui.btnRec.style.display = 'block';
+        ui.btnStop.style.display = 'none';
+    }
+
+    // Start
+    setTimeout(initClouds, 100);
+    animate();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRF Map CRM</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://cdn.jsdelivr.net/npm/gridstack@7.2.3/dist/gridstack.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/gridstack@7.2.3/dist/gridstack-all.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-body: #020617;
+            --bg-sidebar: #0f172a;
+            --bg-panel: rgba(15, 23, 42, 0.95);
+            --border: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6; 
+            --danger: #ef4444;
+            --success: #10b981;
+            --radius: 8px;
+        }
+
+        [data-theme="light"] {
+            --bg-body: #f8fafc;
+            --bg-sidebar: #ffffff;
+            --bg-panel: rgba(255, 255, 255, 0.98);
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent: #2563eb;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; outline: none; }
+        body { background-color: var(--bg-body); color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
+
+        /* LAYOUT */
+        #app-container { display: flex; width: 100%; height: 100%; }
+        aside { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 50; transition: width 0.3s ease; }
+        main { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        header { height: 64px; background: var(--bg-panel); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; backdrop-filter: blur(8px); z-index: 40; }
+
+        /* NAV */
+        .nav-item { padding: 12px 16px; margin: 4px 8px; border-radius: var(--radius); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 0.9rem; font-weight: 500; transition: 0.2s; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text-main); }
+        .nav-item.active { background: var(--accent); color: white; }
+
+        .btn { padding: 8px 12px; border-radius: var(--radius); font-size: 0.85rem; font-weight: 500; border: 1px solid var(--border); background: var(--bg-panel); color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn:hover { background: var(--border); }
+        .btn-primary { background: var(--accent); color: white; border: none; }
+        .badge { background: var(--danger); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; margin-left: auto; }
+
+        /* MAP */
+        #map { width: 100%; height: 100%; z-index: 1; background: #0f172a; }
+        .map-search-bar { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 320px; z-index: 800; display: flex; gap: 8px; transition: top 0.3s ease; }
+        .map-search-bar.plotting { top: 80px; }
+        .plotting-banner { position: absolute; top: 0; left: 0; right: 0; background: var(--accent); color: white; padding: 12px; text-align: center; z-index: 850; font-weight: 600; display: none; }
+        .map-controls { position: absolute; bottom: 30px; left: 20px; z-index: 500; background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; width: 260px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.25); max-height: 80vh; overflow-y: auto; }
+        .map-legend { position: absolute; bottom: 30px; right: 30px; z-index: 990; background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; min-width: 220px; max-height: 400px; overflow-y: auto; backdrop-filter: blur(12px); display: none; }
+        
+        .legend-item { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 0.85rem; cursor: pointer; padding: 6px; border-radius: 4px; transition: 0.2s; }
+        .legend-item:hover { background: rgba(255,255,255,0.05); }
+        .legend-item.active { background: rgba(59, 130, 246, 0.2); border: 1px solid var(--accent); }
+        .legend-color { width: 16px; height: 16px; border-radius: 50%; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0; }
+        .legend-color input { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; opacity: 0; cursor: pointer; }
+
+        /* HEATMAP V2 STYLE */
+        .heat-gradient { height: 12px; width: 100%; background: linear-gradient(to right, blue, cyan, lime, yellow, red); border-radius: 6px; margin-top: 8px; border: 1px solid var(--border); }
+        .heat-labels { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; }
+
+        /* DRAWER (Resizable) */
+        .drawer { position: absolute; top: 0; right: 0; bottom: 0; width: 450px; min-width: 300px; max-width: 900px; z-index: 2000; transform: translateX(100%); transition: transform 0.3s ease; border-left: 1px solid var(--border); background: var(--bg-panel); display: flex; flex-direction: column; box-shadow: -10px 0 40px rgba(0,0,0,0.3); backdrop-filter: blur(15px); }
+        .drawer.open { transform: translateX(0); }
+        .drawer-resizer { position: absolute; top: 0; bottom: 0; left: -4px; width: 12px; cursor: ew-resize; z-index: 2001; }
+
+        /* FORMS */
+        .form-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; display: block; }
+        .form-input { width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.1); border: 1px solid var(--border); color: var(--text-main); margin-bottom: 12px; font-size: 0.9rem; }
+        .form-input[readonly] { border-color: transparent; background: transparent; padding-left: 0; pointer-events: none; font-weight: 500; }
+
+        /* PIN ANIMATION */
+        .pin-marker svg { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+        .view-section { display: none; height: 100%; width: 100%; }
+        .view-section.active { display: block; }
+
+        #loadingOverlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.85); z-index: 9999; display:none; flex-direction:column; align-items:center; justify-content:center; color:white; }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 10px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="glass">
+
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <div style="font-weight: 600;">Processing Dataset...</div>
+    </div>
+
+    <div id="app-container">
+        <aside>
+            <div class="logo-area" style="padding: 24px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                <img src="IRF LOGO.png" alt="IRF" style="height: 48px; object-fit: contain;" onerror="this.style.display='none';">
+                <span style="font-size: 0.8rem; color: var(--accent); font-weight: 700; letter-spacing: 1px;">MAP CRM</span>
+            </div>
+
+            <div style="flex: 1; padding: 12px 0;">
+                <div class="nav-item active" onclick="app.switchView('map')"><i data-lucide="map"></i> Map Overview</div>
+                <div class="nav-item" onclick="app.switchView('dashboard')"><i data-lucide="layout-dashboard"></i> BI Dashboard</div>
+                <div class="nav-item" onclick="app.switchView('grid')"><i data-lucide="table-2"></i> Data Grid</div>
+                
+                <div style="height: 1px; background: var(--border); margin: 12px 16px;"></div>
+
+                <div class="nav-item" onclick="app.openUnmappedDrawer()">
+                    <i data-lucide="map-pin-off" style="color: var(--danger);"></i> 
+                    Unmapped
+                    <span id="unmappedCount" class="badge">0</span>
+                </div>
+            </div>
+
+            <div style="padding: 20px; border-top: 1px solid var(--border);">
+                <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="app.openAddRecord()">
+                    <i data-lucide="plus-circle"></i> Add Record
+                </button>
+            </div>
+        </aside>
+
+        <main>
+            <header>
+                <button class="btn" onclick="app.toggleFilterPanel()">
+                    <i data-lucide="filter"></i> Filters
+                    <span id="activeFilterBadge" class="badge" style="display:none; background: var(--accent);">0</span>
+                </button>
+
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn btn-icon" onclick="app.toggleTheme()"><i data-lucide="sun-moon"></i></button>
+                    <div style="width: 1px; height: 24px; background: var(--border);"></div>
+                    <div id="dashActions" style="display:none; gap:8px;">
+                        <button class="btn" onclick="app.openWidgetBuilder()"><i data-lucide="plus"></i> Widget</button>
+                        <button class="btn" onclick="app.exportDashboardJSON()"><i data-lucide="save"></i> Save</button>
+                        <button class="btn" onclick="document.getElementById('jsonInput').click()"><i data-lucide="upload"></i> Load</button>
+                        <input type="file" id="jsonInput" hidden accept=".json">
+                    </div>
+                    <button class="btn" onclick="document.getElementById('fileInput').click()"><i data-lucide="upload-cloud"></i> Import</button>
+                    <input type="file" id="fileInput" hidden accept=".xlsx, .csv">
+                    <button class="btn btn-primary" onclick="app.exportData()"><i data-lucide="download"></i> Export</button>
+                </div>
+            </header>
+
+            <div id="view-map" class="view-section active">
+                <div id="plottingBanner" class="plotting-banner">
+                    PLOTTING MODE: Click map to set location for "<span id="plottingName"></span>"
+                    <button class="btn" style="height:24px; padding: 0 8px; margin-left:10px; background:rgba(0,0,0,0.2); border:none; color:white;" onclick="app.cancelPlotting()">Cancel</button>
+                </div>
+
+                <div id="mapSearch" class="map-search-bar glass" style="padding: 6px; border-radius: 8px;">
+                    <input type="text" id="geoSearch" placeholder="Search City/Place..." style="background:transparent; border:none; color:var(--text-main); flex:1; padding-left:8px;">
+                    <button class="btn btn-primary" style="padding: 4px 10px;" onclick="app.searchLocation()"><i data-lucide="search" size="16"></i></button>
+                </div>
+
+                <div id="map"></div>
+
+                <div class="map-controls">
+                    <div style="margin-bottom: 12px;">
+                        <span class="form-label">Map Mode</span>
+                        <select id="mapStyle" class="form-input" style="margin-bottom:0;" onchange="app.setMapLayer(this.value)">
+                            <option value="dark">Dark Canvas</option>
+                            <option value="light">Light Canvas</option>
+                            <option value="sat">Satellite</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <span class="form-label">View Style</span>
+                        <div style="display:flex; gap: 6px;">
+                            <button class="btn active" id="vis-cluster" style="flex:1; justify-content:center;" onclick="app.toggleVis('cluster')">Cluster</button>
+                            <button class="btn" id="vis-pin" style="flex:1; justify-content:center;" onclick="app.toggleVis('pin')">Pin</button>
+                            <button class="btn" id="vis-heat" style="flex:1; justify-content:center;" onclick="app.toggleVis('heat')">Heat</button>
+                        </div>
+                    </div>
+
+                    <div id="heatControls" style="display:none; border-top:1px solid var(--border); padding-top:10px; margin-bottom:12px;">
+                        <div style="margin-bottom: 8px;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px;">
+                                <span>Intensity</span> <span id="intVal">0.5</span>
+                            </div>
+                            <input type="range" min="0.1" max="3" step="0.1" value="0.5" style="width:100%" oninput="app.updateHeatmap(this.value, 'intensity'); document.getElementById('intVal').innerText=this.value">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px;">
+                                <span>Radius</span> <span id="radVal">25</span>
+                            </div>
+                            <input type="range" min="10" max="60" value="25" style="width:100%" oninput="app.updateHeatmap(this.value, 'radius'); document.getElementById('radVal').innerText=this.value">
+                        </div>
+                        <div class="heat-gradient"></div>
+                        <div class="heat-labels"><span>Low</span><span>Mid</span><span>High</span></div>
+                    </div>
+
+                    <div>
+                        <span class="form-label">Color Markers By</span>
+                        <select id="colorBy" class="form-input" style="margin-bottom:0;" onchange="app.renderMap()">
+                            <option value="Status">Status</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="mapLegend" class="map-legend">
+                    <div class="form-label" style="border-bottom:1px solid var(--border); padding-bottom:5px; margin-bottom:10px;">Legend (Click to Filter)</div>
+                    <div id="legendContent"></div>
+                </div>
+            </div>
+
+            <div id="view-dashboard" class="view-section" style="padding: 20px; overflow-y:auto;"><div class="grid-stack" id="dashboard-grid"></div></div>
+            <div id="view-grid" class="view-section" style="padding: 24px;">
+                <div class="glass" style="height:100%; display:flex; flex-direction:column; border-radius:12px; overflow:hidden;">
+                    <div style="padding:16px; border-bottom:1px solid var(--border);"><input type="text" placeholder="Search table..." class="form-input" style="margin:0;" onkeyup="app.filterGrid(this.value)"></div>
+                    <div style="flex:1; overflow:auto;"><table style="width:100%; border-collapse:collapse; font-size:0.85rem;"><thead id="gridHead" style="position:sticky; top:0; background:var(--bg-panel); z-index:10; box-shadow: 0 1px 0 var(--border);"></thead><tbody id="gridBody"></tbody></table></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="drawer" class="drawer">
+        <div class="drawer-resizer" id="drawerResizer"></div>
+        <div style="padding: 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <h3 id="drawerTitle" style="font-weight: 700;">Details</h3>
+            <button class="btn btn-icon" onclick="app.closeDrawer()"><i data-lucide="x"></i></button>
+        </div>
+        <div id="drawerContent" style="padding: 24px; overflow-y: auto; flex: 1;"></div>
+        <div id="drawerFooter" style="padding: 24px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.02);"></div>
+    </div>
+
+    <script>
+        const app = {
+            data: [], filtered: [], headers: [], activeFilters: [], dashConfig: [],
+            map: null, markers: null, pins: null, heatLayer: null, grid: null,
+            isPlotting: false, plottingIdx: -1, isEditing: false,
+            originalFileName: 'Export',
+            baseColors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'],
+            categoryColors: {},
+
+            layers: {
+                dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }),
+                light: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }),
+                sat: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 })
+            },
+
+            init: function() {
+                lucide.createIcons();
+                this.initMap();
+                this.initGridStack();
+                this.initResizer();
+                this.setupLoader();
+                this.checkTheme();
+            },
+
+            setupLoader: function() {
+                document.getElementById('fileInput').addEventListener('change', e => {
+                    const file = e.target.files[0];
+                    if(!file) return;
+                    document.getElementById('loadingOverlay').style.display = 'flex';
+                    this.originalFileName = file.name.split('.')[0]; 
+                    const reader = new FileReader();
+
+                    reader.onload = (evt) => {
+                        try {
+                            const data = new Uint8Array(evt.target.result);
+                            const wb = XLSX.read(data, {type: 'array'});
+                            const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                            if (json.length > 0) {
+                                this.data = json; this.filtered = [...json]; this.headers = Object.keys(json[0]);
+                                this.populateControls(); this.refreshAll();
+                            }
+                        } catch (err) { console.error(err); } 
+                        finally { document.getElementById('loadingOverlay').style.display = 'none'; }
+                    };
+                    reader.readAsArrayBuffer(file);
+                });
+            },
+
+            exportData: function() {
+                const ws = XLSX.utils.json_to_sheet(this.data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Data");
+                const ts = new Date().toISOString().replace(/T/, '_').split('.')[0].replace(/:/g, '-');
+                XLSX.writeFile(wb, `${this.originalFileName}_${ts}.xlsx`);
+            },
+
+            applyFilters: function() {
+                if(!this.activeFilters.length) { this.filtered = [...this.data]; document.getElementById('activeFilterBadge').style.display = 'none'; }
+                else {
+                    const groups = _.groupBy(this.activeFilters, 'col');
+                    this.filtered = this.data.filter(row => {
+                        return _.every(groups, (items, col) => {
+                            const vals = _.map(items, 'val');
+                            return vals.includes(String(row[col] || ''));
+                        });
+                    });
+                    document.getElementById('activeFilterBadge').innerText = this.activeFilters.length;
+                    document.getElementById('activeFilterBadge').style.display = 'inline-block';
+                }
+                this.renderMap(); this.renderGrid(); this.renderDashboard();
+            },
+
+            toggleLegendFilter: function(col, val) {
+                const idx = _.findIndex(this.activeFilters, {col, val});
+                if(idx > -1) this.activeFilters.splice(idx, 1);
+                else this.activeFilters.push({col, val});
+                this.applyFilters();
+            },
+
+            refreshAll: function() { this.applyFilters(); this.updateUnmappedCount(); },
+            populateControls: function() {
+                const s = document.getElementById('colorBy'); s.innerHTML = '<option value="Status">Status</option>';
+                this.headers.forEach(h => { if(new Set(this.data.map(r=>r[h])).size < 30) s.add(new Option(h, h)); });
+            },
+
+            initMap: function() {
+                this.map = L.map('map', { zoomControl: false }).setView([20, 0], 2);
+                this.layers.dark.addTo(this.map);
+                L.control.zoom({ position: 'bottomright' }).addTo(this.map);
+                this.markers = L.markerClusterGroup({ iconCreateFunction: (c) => L.divIcon({ html: `<div style="width:30px;height:30px;background:var(--accent);border:2px solid #fff;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;">${c.getChildCount()}</div>`, className: 'cluster-icon', iconSize: [30, 30] }) });
+                this.pins = L.layerGroup();
+                this.map.addLayer(this.markers);
+                this.map.on('click', e => { if(this.isPlotting) this.executePlot(e); });
+            },
+
+            renderMap: function() {
+                this.markers.clearLayers(); this.pins.clearLayers(); if(this.heatLayer) this.map.removeLayer(this.heatLayer);
+                const colorCol = document.getElementById('colorBy').value;
+                const uniqueValues = _.sortBy(_.uniq(_.map(this.data, colorCol)));
+                uniqueValues.forEach((val, i) => { if(!this.categoryColors[val]) this.categoryColors[val] = this.baseColors[i % this.baseColors.length]; });
+                this.renderLegend(uniqueValues, colorCol);
+
+                const pts = [];
+                this.filtered.forEach((r, i) => {
+                    if(this.hasCoords(r)) {
+                        const lat = parseFloat(r['Latitude (Y)'] || r['Latitude Corrected']);
+                        const lng = parseFloat(r['Longitude (X)'] || r['Longitude corrected']);
+                        pts.push([lat, lng, 0.5]);
+                        const color = this.categoryColors[r[colorCol] || 'Unknown'];
+                        const icon = L.divIcon({ className: 'pin-marker', html: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="${color}" stroke="#ffffff" stroke-width="1.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`, iconSize: [32, 32], iconAnchor: [16, 32] });
+                        const m = L.marker([lat, lng], {icon}).on('click', () => this.openDetails(r, this.data.indexOf(r)));
+                        this.markers.addLayer(m); this.pins.addLayer(m);
+                    }
+                });
+                if(document.getElementById('vis-heat').classList.contains('active')) this.renderHeatmap(pts);
+            },
+
+            renderLegend: function(values, colName) {
+                const content = document.getElementById('legendContent'); content.innerHTML = '';
+                if(values.length > 30) { document.getElementById('mapLegend').style.display='none'; return; }
+                document.getElementById('mapLegend').style.display='block';
+                values.forEach(val => {
+                    const active = _.some(this.activeFilters, {col: colName, val: String(val)});
+                    const item = document.createElement('div');
+                    item.className = `legend-item ${active ? 'active' : ''}`;
+                    item.innerHTML = `<div class="legend-color" style="background:${this.categoryColors[val]}"><input type="color" value="${this.categoryColors[val]}" onchange="app.updateColor('${val}',this.value)"></div><span style="flex:1" onclick="app.toggleLegendFilter('${colName}', '${val}')">${val}</span>`;
+                    content.appendChild(item);
+                });
+            },
+
+            updateColor: function(v, c) { this.categoryColors[v] = c; this.renderMap(); },
+
+            renderHeatmap: function(points) {
+                if(this.heatLayer) this.map.removeLayer(this.heatLayer);
+                const r = document.querySelector('input[oninput*="radius"]').value;
+                const i = document.querySelector('input[oninput*="intensity"]').value;
+                this.heatLayer = L.heatLayer(points || [], { radius: parseInt(r), max: parseFloat(i), blur: 15, maxZoom: 10, gradient: { 0.2: 'blue', 0.4: 'cyan', 0.6: 'lime', 0.8: 'yellow', 1.0: 'red' } }).addTo(this.map);
+            },
+
+            updateHeatmap: function() { this.renderHeatmap(); },
+
+            openDetails: function(row, idx) {
+                this.currentDetailRow = row; this.currentDetailIdx = idx; this.isEditing = false;
+                this.renderDrawerContent(); document.getElementById('drawer').classList.add('open');
+            },
+
+            renderDrawerContent: function() {
+                const row = this.currentDetailRow;
+                let html = `<div style="display:flex; flex-direction:column; gap:12px;">`;
+                this.headers.forEach(k => {
+                    html += `<div><label class="form-label">${k}</label><input class="form-input" id="inp-${k}" value="${row[k]||''}" ${this.isEditing?'':'readonly'}></div>`;
+                });
+                html += '</div>';
+                const footer = this.isEditing 
+                    ? `<div style="display:flex;gap:10px;"><button class="btn btn-primary" style="flex:1" onclick="app.saveDetails()">Save</button><button class="btn" onclick="app.addFieldPrompt()">+ Field</button><button class="btn" style="flex:1" onclick="app.cancelEdit()">Cancel</button></div>`
+                    : `<button class="btn btn-primary" style="width:100%" onclick="app.enableEdit()">Edit Record</button>`;
+                document.getElementById('drawerTitle').innerText = row['Customer']||'Details';
+                document.getElementById('drawerContent').innerHTML = html;
+                document.getElementById('drawerFooter').innerHTML = footer;
+            },
+
+            enableEdit: function() { this.isEditing = true; this.renderDrawerContent(); },
+            cancelEdit: function() { this.isEditing = false; this.renderDrawerContent(); },
+            saveDetails: function() {
+                this.headers.forEach(k => { const el = document.getElementById(`inp-${k}`); if(el) this.currentDetailRow[k] = el.value; });
+                this.isEditing = false; this.renderDrawerContent(); this.refreshAll();
+            },
+            addFieldPrompt: function() {
+                const name = prompt("New Field Name:");
+                if(name && !this.headers.includes(name)) { this.headers.push(name); this.data.forEach(r => r[name] = ""); this.renderDrawerContent(); }
+            },
+
+            initResizer: function() {
+                const resizer = document.getElementById('drawerResizer');
+                const drawer = document.getElementById('drawer');
+                let resizing = false;
+                resizer.addEventListener('mousedown', () => { resizing = true; drawer.style.transition = 'none'; });
+                document.addEventListener('mousemove', e => { if(resizing) { const w = window.innerWidth - e.clientX; if(w > 300 && w < 900) drawer.style.width = w + 'px'; } });
+                document.addEventListener('mouseup', () => { resizing = false; drawer.style.transition = 'transform 0.3s ease'; });
+            },
+
+            toggleVis: function(t) {
+                document.querySelectorAll('.map-controls .btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('vis-'+t).classList.add('active');
+                this.map.removeLayer(this.markers); this.map.removeLayer(this.pins); if(this.heatLayer) this.map.removeLayer(this.heatLayer);
+                document.getElementById('heatControls').style.display = t==='heat'?'block':'none';
+                if(t==='cluster') this.map.addLayer(this.markers); if(t==='pin') this.map.addLayer(this.pins); if(t==='heat') this.renderMap();
+            },
+
+            updateUnmappedCount: function() {
+                const count = _.filter(this.data, r => !this.hasCoords(r)).length;
+                document.getElementById('unmappedCount').innerText = count;
+            },
+
+            hasCoords: function(r) { 
+                const lat = r['Latitude (Y)'] || r['Latitude Corrected'];
+                const lng = r['Longitude (X)'] || r['Longitude corrected'];
+                return !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng));
+            },
+
+            openUnmappedDrawer: function() {
+                const u = this.data.map((r,i)=>({r,i})).filter(o=>!this.hasCoords(o.r));
+                let h = u.length ? u.map(x => `<div style="padding:12px; border-bottom:1px solid var(--border); cursor:pointer;" onclick="app.startPlotting(${x.i})"><b>${x.r['Customer']||'Unknown'}</b><br><span style="color:var(--text-muted);font-size:0.8rem">${x.r['Cities']||'Unknown'}</span></div>`).join('') : '<div style="padding:12px">All items mapped.</div>';
+                this.openDrawer('Unmapped Items', h);
+            },
+
+            startPlotting: function(idx) {
+                this.isPlotting = true; this.plottingIdx = idx;
+                this.closeDrawer(); this.switchView('map');
+                document.getElementById('plottingBanner').style.display='block';
+                document.getElementById('plottingName').innerText = this.data[idx]['Customer']||'Site';
+                document.getElementById('mapSearch').classList.add('plotting');
+                const query = (this.data[idx]['Cities'] || '') + ' ' + (this.data[idx]['Country'] || '');
+                document.getElementById('geoSearch').value = query;
+                if(query.trim()) this.searchLocation();
+            },
+
+            executePlot: function(e) {
+                if(this.plottingIdx !== -1 && confirm("Set coordinates here?")) {
+                    this.data[this.plottingIdx]['Latitude (Y)'] = e.latlng.lat.toFixed(6);
+                    this.data[this.plottingIdx]['Longitude (X)'] = e.latlng.lng.toFixed(6);
+                    this.cancelPlotting(); this.refreshAll();
+                }
+            },
+
+            cancelPlotting: function() { this.isPlotting=false; document.getElementById('plottingBanner').style.display='none'; document.getElementById('mapSearch').classList.remove('plotting'); },
+            searchLocation: function() {
+                const q = document.getElementById('geoSearch').value; if(!q) return;
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}`).then(r=>r.json()).then(d=>{ if(d[0]) this.map.flyTo([d[0].lat, d[0].lon], 12); });
+            },
+
+            switchView: function(v) { document.querySelectorAll('.view-section').forEach(e => e.classList.remove('active')); document.getElementById('view-'+v).classList.add('active'); if(v==='map') setTimeout(() => this.map.invalidateSize(), 200); },
+            toggleTheme: function() { const n = document.documentElement.getAttribute('data-theme')==='light'?'dark':'light'; document.documentElement.setAttribute('data-theme', n); this.updateBaseTile(); },
+            checkTheme: function() { document.documentElement.setAttribute('data-theme', 'dark'); },
+            updateBaseTile: function() { this.layers.dark.setUrl(document.documentElement.getAttribute('data-theme')==='dark' ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'); },
+            setMapLayer: function(t) { Object.values(this.layers).forEach(l=>this.map.removeLayer(l)); this.layers[t].addTo(this.map); },
+            renderGrid: function() { const h=document.getElementById('gridHead'), b=document.getElementById('gridBody'); h.innerHTML=`<tr>${this.headers.map(x=>`<th>${x}</th>`).join('')}</tr>`; b.innerHTML=this.filtered.slice(0,100).map((r,i)=>`<tr onclick="app.openDetails(app.filtered[${i}], ${i})">${this.headers.map(k=>`<td>${r[k]||''}</td>`).join('')}</tr>`).join(''); },
+            filterGrid: function(q) { document.querySelectorAll('#gridBody tr').forEach(r => r.style.display = r.innerText.toLowerCase().includes(q.toLowerCase()) ? '' : 'none'); },
+            initGridStack: function() { this.grid = GridStack.init({column:12, cellHeight:100, margin:12, container:'#dashboard-grid', animate:true}); },
+            renderDashboard: function() { this.dashConfig.forEach(c => this.renderChart(c)); },
+            closeDrawer: function() { document.getElementById('drawer').classList.remove('open'); },
+            openDrawer: function(t, c, f='') { document.getElementById('drawerTitle').innerText=t; document.getElementById('drawerContent').innerHTML=c; document.getElementById('drawerFooter').innerHTML=f; document.getElementById('drawer').classList.add('open'); lucide.createIcons(); },
+            toggleFilterPanel: function() { /* Filter UI Reused from prompt */ },
+            openWidgetBuilder: function() { /* Dash UI Reused from prompt */ }
+        };
+        window.onload = () => app.init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Engine | v4.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0f0f11;
+            --bg-panel: #18181b;
+            --border: #27272a;
+            --accent: #3b82f6; /* Blue 500 */
+        }
+
+        body { background-color: var(--bg-dark); color: #e2e8f0; font-family: sans-serif; overflow: hidden; }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+
+        /* Code Editor */
+        .code-area { font-family: 'Menlo', 'Consolas', monospace; font-size: 13px; line-height: 1.6; background-color: #0b0b0d; color: #cbd5e1; resize: none; outline: none; }
+
+        /* Visual Highlighter in Preview */
+        .engine-active { outline: 2px solid var(--accent) !important; cursor: pointer; }
+
+        /* Preview Container */
+        #preview-wrapper {
+            background-color: #202023;
+            background-image: radial-gradient(#333 1px, transparent 1px);
+            background-size: 20px 20px;
+            display: flex; justify-content: center; align-items: center; transition: all 0.3s;
+        }
+
+        /* View Modes */
+        iframe { background: white; transition: all 0.3s ease; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .mode-desktop iframe { width: 100%; height: 100%; border: none; }
+        .mode-mobile iframe { width: 375px; height: 667px; border: 8px solid #333; border-radius: 20px; }
+        .mode-tablet iframe { width: 768px; height: 1024px; border: 8px solid #333; border-radius: 12px; }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+
+    <header class="h-14 bg-[#18181b] border-b border-[#27272a] flex items-center justify-between px-4 z-20">
+        <div class="flex items-center gap-4">
+            <div class="font-bold text-lg flex items-center gap-2">
+                <i class="fa-solid fa-layer-group text-blue-500"></i> HTML ENGINE
+            </div>
+            <div id="project-label" class="hidden px-2 py-0.5 bg-gray-800 rounded text-xs text-gray-400 border border-gray-700"></div>
+        </div>
+
+        <div class="flex bg-black/40 rounded-lg p-1 gap-1 border border-[#333]">
+            <button onclick="setMode('desktop')" class="p-2 text-xs rounded hover:bg-white/10 text-blue-400" title="Desktop"><i class="fa-solid fa-desktop"></i></button>
+            <button onclick="setMode('tablet')" class="p-2 text-xs rounded hover:bg-white/10 text-gray-400" title="Tablet"><i class="fa-solid fa-tablet-screen-button"></i></button>
+            <button onclick="setMode('mobile')" class="p-2 text-xs rounded hover:bg-white/10 text-gray-400" title="Mobile"><i class="fa-solid fa-mobile-screen"></i></button>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <span id="save-indicator" class="text-xs text-green-500 font-mono opacity-0 transition-opacity">Saved</span>
+            <button onclick="saveFile()" class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded font-medium flex items-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i> Save
+            </button>
+            <button id="btn-open" onclick="initProject()" class="text-xs bg-[#27272a] hover:bg-[#3f3f46] text-white px-4 py-2 rounded border border-[#3f3f46]">
+                Open Folder
+            </button>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden">
+        
+        <aside class="w-64 bg-[#131315] border-r border-[#27272a] flex flex-col">
+            <div class="p-3 border-b border-[#27272a] flex justify-between items-center bg-[#18181b]">
+                <span class="text-xs font-bold text-gray-500 uppercase">Explorer</span>
+                <button onclick="refreshFileTree()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+            <div id="file-tree" class="flex-1 overflow-y-auto p-2 space-y-0.5">
+                <div class="mt-8 text-center text-xs text-gray-600">Open a folder to start.</div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0">
+            <div class="h-9 bg-[#131315] border-b border-[#27272a] flex items-center px-2">
+                <div id="active-tab" class="hidden px-3 py-1 text-xs text-white border-t-2 border-blue-500 bg-[#1e1e20] h-full flex items-center">
+                    <span id="tab-name">index.html</span>
+                </div>
+            </div>
+            
+            <div class="flex-1 flex h-full relative">
+                <div class="w-1/2 h-full border-r border-[#27272a] flex flex-col bg-[#0b0b0d]">
+                    <textarea id="editor" class="w-full h-full p-4 code-area border-none" spellcheck="false"></textarea>
+                </div>
+                <div id="preview-wrapper" class="w-1/2 h-full mode-desktop relative">
+                    <iframe id="preview-frame" class="h-full w-full bg-white"></iframe>
+                </div>
+            </div>
+        </main>
+
+        <aside class="w-72 bg-[#131315] border-l border-[#27272a] flex flex-col" id="inspector">
+            <div class="p-3 border-b border-[#27272a] bg-[#18181b]">
+                <span class="text-xs font-bold text-gray-500 uppercase">Properties</span>
+            </div>
+            <div id="props" class="p-4 space-y-5 opacity-40 pointer-events-none transition-opacity">
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-gray-500 block mb-1">Content</label>
+                    <input type="text" id="prop-text" class="w-full bg-[#1e1e20] border border-[#333] rounded px-2 py-1 text-xs text-white outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-gray-500 block mb-1">Color</label>
+                    <div class="flex gap-2">
+                        <input type="color" id="prop-color" class="bg-transparent h-6 w-6 cursor-pointer">
+                        <input type="color" id="prop-bg" class="bg-transparent h-6 w-6 cursor-pointer">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-gray-500 block mb-1">Padding</label>
+                    <input type="range" id="prop-padding" class="w-full accent-blue-500">
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-gray-500 block mb-1">Font Size</label>
+                    <input type="number" id="prop-size" class="w-full bg-[#1e1e20] border border-[#333] rounded px-2 py-1 text-xs text-white">
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <script>
+        // --- CORE STATE ---
+        let rootHandle = null;
+        let activeHandle = null;
+        let activeEl = null;
+        
+        // 1. ASSET REGISTRY (For images/css)
+        const assetMap = new Map(); 
+        
+        // 2. FILE REGISTRY (For navigation lookup)
+        // Key: "about.html", Value: FileHandle
+        const fileMap = new Map();
+
+        // --- FILE SYSTEM ---
+
+        async function initProject() {
+            try {
+                rootHandle = await window.showDirectoryPicker();
+                document.getElementById('btn-open').classList.add('hidden');
+                document.getElementById('project-label').innerText = rootHandle.name;
+                document.getElementById('project-label').classList.remove('hidden');
+                
+                await buildFileSystem();
+                
+                // Auto-open index.html
+                if(fileMap.has('index.html')) openFile(fileMap.get('index.html'), 'index.html');
+                else if(fileMap.size > 0) {
+                    const first = fileMap.keys().next().value;
+                    openFile(fileMap.get(first), first);
+                }
+
+            } catch(e) { console.error(e); }
+        }
+
+        async function buildFileSystem() {
+            const tree = document.getElementById('file-tree');
+            tree.innerHTML = "";
+            assetMap.clear();
+            fileMap.clear();
+
+            // Recursive Walk
+            async function walk(dir, pathPrefix, parentEl) {
+                const entries = [];
+                for await (const entry of dir.values()) entries.push(entry);
+                
+                entries.sort((a,b) => (a.kind === b.kind ? 0 : a.kind === 'directory' ? -1 : 1));
+
+                for (const entry of entries) {
+                    const fullPath = pathPrefix + entry.name;
+                    
+                    const row = document.createElement('div');
+                    row.className = "flex items-center gap-2 px-3 py-1.5 text-sm text-gray-400 hover:bg-[#27272a] hover:text-white cursor-pointer rounded select-none";
+                    row.style.paddingLeft = (fullPath.split('/').length * 10) + 'px';
+
+                    if (entry.kind === 'file') {
+                        // Store in File Map
+                        fileMap.set(fullPath, entry);
+
+                        // UI
+                        let icon = 'fa-file';
+                        if(entry.name.endsWith('.html')) icon = 'fa-brands fa-html5 text-orange-500';
+                        else if(entry.name.endsWith('.css')) icon = 'fa-brands fa-css3 text-blue-500';
+                        else if(entry.name.endsWith('.js')) icon = 'fa-brands fa-js text-yellow-500';
+                        else if(entry.name.match(/\.(png|jpg|jpeg|gif|svg)$/)) {
+                            icon = 'fa-image text-purple-500';
+                            // Create Blob for images
+                            const file = await entry.getFile();
+                            assetMap.set(fullPath, URL.createObjectURL(file));
+                        }
+                        
+                        // Handle CSS Blobs too
+                        if(entry.name.endsWith('.css')) {
+                            const file = await entry.getFile();
+                            assetMap.set(fullPath, URL.createObjectURL(file));
+                        }
+
+                        row.innerHTML = `<i class="${icon} w-4 text-center"></i> ${entry.name}`;
+                        row.onclick = () => openFile(entry, fullPath);
+                    } else {
+                        // Directory
+                        row.innerHTML = `<i class="fa-solid fa-folder text-yellow-600 w-4 text-center"></i> ${entry.name}`;
+                        parentEl.appendChild(row);
+                        await walk(entry, fullPath + '/', parentEl);
+                        continue; 
+                    }
+                    parentEl.appendChild(row);
+                }
+            }
+
+            await walk(rootHandle, '', tree);
+        }
+
+        async function openFile(handle, path) {
+            activeHandle = handle;
+            const file = await handle.getFile();
+            const content = await file.text();
+            
+            document.getElementById('editor').value = content;
+            document.getElementById('tab-name').innerText = path;
+            document.getElementById('active-tab').classList.remove('hidden');
+
+            if(path.endsWith('.html')) renderPreview(content);
+        }
+
+        async function saveFile() {
+            if(!activeHandle) return;
+            
+            // Sync Visuals first
+            if(activeHandle.name.endsWith('.html')) syncVisualToCode();
+
+            try {
+                const writable = await activeHandle.createWritable();
+                await writable.write(document.getElementById('editor').value);
+                await writable.close();
+                
+                const ind = document.getElementById('save-indicator');
+                ind.style.opacity = '1';
+                setTimeout(() => ind.style.opacity = '0', 2000);
+                
+                // If CSS saved, we should refresh preview, but simple save is OK for now
+            } catch(e) { alert("Save Error: " + e); }
+        }
+
+        // --- PREVIEW ENGINE (THE FIX) ---
+
+        function renderPreview(html) {
+            const iframe = document.getElementById('preview-frame');
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // 1. INJECT ASSETS (Images/CSS)
+            doc.querySelectorAll('[src], [href]').forEach(el => {
+                const src = el.getAttribute('src') || el.getAttribute('href');
+                if(!src) return;
+                
+                // Clean relative paths logic (simple version)
+                // If src is "./style.css", we look for "style.css"
+                // If src is "images/logo.png", we look for "images/logo.png"
+                let lookup = src.replace(/^\.\//, ''); 
+                
+                if(assetMap.has(lookup)) {
+                    if(el.tagName === 'LINK') el.href = assetMap.get(lookup);
+                    else el.src = assetMap.get(lookup);
+                }
+            });
+
+            // 2. INJECT LINK INTERCEPTOR (The Navigation Fix)
+            const script = doc.createElement('script');
+            script.innerHTML = `
+                // Intercept Clicks
+                document.body.addEventListener('click', (e) => {
+                    const link = e.target.closest('a');
+                    if (link) {
+                        e.preventDefault(); // STOP Browser Navigation
+                        const href = link.getAttribute('href');
+                        // Tell Editor to switch files
+                        window.parent.postMessage({ type: 'NAVIGATE', path: href }, '*');
+                        return;
+                    }
+                    
+                    // Handle Visual Editing Selection
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const target = e.target;
+                    
+                    // Highlight logic
+                    document.querySelectorAll('.engine-active').forEach(x => x.classList.remove('engine-active'));
+                    target.classList.add('engine-active');
+                    
+                    // Send selection to parent
+                    // We can't pass the element, but we can enable the panel in parent
+                    // Parent handles the logic via iframe reference
+                });
+            `;
+            doc.body.appendChild(script);
+
+            // 3. INJECT STYLES
+            const style = doc.createElement('style');
+            style.innerHTML = `
+                .engine-active { outline: 2px solid #3b82f6 !important; }
+                body { cursor: default; }
+            `;
+            doc.head.appendChild(style);
+
+            iframe.srcdoc = doc.documentElement.outerHTML;
+
+            // Bind Parent-side click handler
+            iframe.onload = () => {
+                iframe.contentDocument.body.addEventListener('click', (e) => {
+                    if(e.target.closest('a')) return; // Handled by script above
+                    
+                    activeEl = e.target;
+                    loadProps(activeEl);
+                });
+            };
+        }
+
+        // HANDLE NAVIGATION MESSAGES
+        window.addEventListener('message', (e) => {
+            if(e.data.type === 'NAVIGATE') {
+                let path = e.data.path;
+                // Normalize path (remove ./ )
+                path = path.replace(/^\.\//, '');
+                
+                if(fileMap.has(path)) {
+                    openFile(fileMap.get(path), path);
+                } else {
+                    // Try finding just by filename (Smart Search)
+                    const found = Array.from(fileMap.keys()).find(k => k.endsWith(path));
+                    if(found) openFile(fileMap.get(found), found);
+                    else alert(`File not found: ${path}\nMake sure it exists in the folder.`);
+                }
+            }
+        });
+
+        // --- VISUAL TOOLS ---
+
+        function loadProps(el) {
+            const panel = document.getElementById('props');
+            panel.style.opacity = '1';
+            panel.style.pointerEvents = 'all';
+
+            const comp = document.getElementById('preview-frame').contentWindow.getComputedStyle(el);
+            
+            bind('prop-text', el.innerText, v => el.innerText = v);
+            bind('prop-color', rgbToHex(comp.color), v => el.style.color = v);
+            bind('prop-bg', rgbToHex(comp.backgroundColor), v => el.style.backgroundColor = v);
+            bind('prop-padding', parseInt(comp.padding), v => el.style.padding = v+'px');
+            bind('prop-size', parseInt(comp.fontSize), v => el.style.fontSize = v+'px');
+        }
+
+        function bind(id, val, handler) {
+            const el = document.getElementById(id);
+            const clone = el.cloneNode(true);
+            el.parentNode.replaceChild(clone, el);
+            clone.value = val || '';
+            clone.addEventListener('input', e => handler(e.target.value));
+        }
+
+        function syncVisualToCode() {
+            if(!activeEl) return;
+            const iDoc = document.getElementById('preview-frame').contentDocument;
+            
+            // Clone and Clean
+            const clone = iDoc.body.cloneNode(true);
+            clone.querySelectorAll('script').forEach(s => s.remove());
+            clone.querySelectorAll('.engine-active').forEach(c => c.classList.remove('engine-active'));
+            
+            const newBody = clone.innerHTML;
+            let code = document.getElementById('editor').value;
+            
+            if(code.match(/<body/i)) {
+                code = code.replace(/(<body[^>]*>)([\s\S]*?)(<\/body>)/i, `$1\n${newBody}\n$3`);
+                document.getElementById('editor').value = code;
+            }
+        }
+
+        // --- UTILS ---
+        function setMode(m) {
+            const w = document.getElementById('preview-wrapper');
+            w.className = `w-1/2 h-full relative mode-${m}`;
+            // Reset icons
+            document.querySelectorAll('header button i').forEach(i => i.classList.remove('text-blue-400'));
+        }
+
+        function rgbToHex(rgb) {
+            if(!rgb || !rgb.includes('rgb')) return '#000000';
+            const [r,g,b] = rgb.match(/\d+/g);
+            return "#" + ((1 << 24) + (+r << 16) + (+g << 8) + +b).toString(16).slice(1);
+        }
+        
+        // Editor Live Update
+        let timer;
+        document.getElementById('editor').addEventListener('input', (e) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                if(activeHandle && activeHandle.name.endsWith('.html')) renderPreview(e.target.value);
+            }, 1000);
+        });
+
+        // Key Save
+        document.addEventListener('keydown', e => {
+            if((e.ctrlKey||e.metaKey) && e.key === 's') { e.preventDefault(); saveFile(); }
+        });
+
+    </script>
+</body>
+</html>

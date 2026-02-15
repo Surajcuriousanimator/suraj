@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suraj Kumar | Portfolio</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Apple Strict Design System - Pure Solid Colors */
+        :root {
+            --page-bg: #fbfbfd;
+            --card-bg: #ffffff;
+            --surface-bg: #f5f5f7;
+            --text-title: #1d1d1f;
+            --text-body: #86868b;
+            --accent: #0066cc;
+            --accent-alt: #bf5af2;
+            --nav-bg: rgba(251, 251, 253, 0.8);
+            --border: #d2d2d7;
+            --shadow: 0 10px 40px rgba(0,0,0,0.06);
+            --modal-backdrop: rgba(255, 255, 255, 0.4);
+        }
+
+        [data-theme="dark"] {
+            --page-bg: #000000;
+            --card-bg: #161617;
+            --surface-bg: #1d1d1f;
+            --text-title: #f5f5f7;
+            --text-body: #86868b;
+            --accent: #2997ff;
+            --accent-alt: #bf5af2;
+            --nav-bg: rgba(0, 0, 0, 0.8);
+            --border: #424245;
+            --shadow: 0 15px 50px rgba(0,0,0,0.5);
+            --modal-backdrop: rgba(0, 0, 0, 0.6);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        html, body {
+            background-color: var(--page-bg);
+            color: var(--text-title);
+            font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 17px;
+            line-height: 1.47059;
+            font-weight: 400;
+            letter-spacing: -0.022em;
+            scroll-behavior: smooth;
+            overscroll-behavior: none; 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background-color 0.5s ease, color 0.5s ease;
+            min-height: 100vh;
+        }
+
+        .t-headline { font-size: 80px; line-height: 1.05; font-weight: 600; letter-spacing: -0.015em; }
+        .t-title-1 { font-size: 48px; line-height: 1.08349; font-weight: 600; letter-spacing: -0.003em; }
+        .t-title-2 { font-size: 28px; line-height: 1.14286; font-weight: 600; letter-spacing: 0.007em; }
+        .t-intro { font-size: 24px; line-height: 1.33337; font-weight: 400; letter-spacing: 0.009em; color: var(--text-body); max-width: 700px; margin: 0 auto; }
+        .t-eyebrow { font-size: 14px; line-height: 1.28571; font-weight: 600; letter-spacing: -0.016em; text-transform: uppercase; color: var(--accent-alt); }
+
+        button:active { transform: scale(0.92) !important; transition: transform 0.1s; }
+        a { transition: color 0.3s ease; }
+
+        /* Navigation */
+        nav {
+            position: fixed; top: 0; width: 100%; height: 54px;
+            background: var(--nav-bg);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 40px;
+            z-index: 9000; transition: background 0.5s ease;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        [data-theme="dark"] nav { border-bottom: 1px solid rgba(255,255,255,0.05); }
+        
+        .nav-links { display: flex; gap: 30px; justify-content: center; }
+        .nav-links a { position: relative; color: var(--text-title); text-decoration: none; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0em; opacity: 0.8; transition: opacity 0.3s; padding: 5px 0; }
+        .nav-links a:hover, .nav-links a.active { opacity: 1; }
+        .nav-links a::after { content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 50%; background-color: var(--text-title); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); transform: translateX(-50%); }
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+
+        .nav-actions { display: flex; gap: 20px; justify-content: flex-end; align-items: center; }
+        .theme-toggle { background: var(--surface-bg); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.3s, background 0.3s; }
+        .theme-toggle:hover { transform: scale(1.1); background: var(--border); }
+        .theme-toggle svg { width: 16px; height: 16px; fill: var(--text-title); transition: fill 0.3s; }
+        
+        .profile-btn { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; cursor: pointer; border: 1px solid var(--border); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s; background: var(--surface-bg); }
+        .profile-btn:hover { transform: scale(1.15); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Profile Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-backdrop);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 10000;
+            display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        
+        .profile-card {
+            background: var(--card-bg); width: 92%; max-width: 800px; max-height: 85vh; border-radius: 36px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15); overflow-y: auto; transform: scale(0.95) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); position: relative; padding: 50px 60px; border: 1px solid var(--border);
+        }
+        [data-theme="dark"] .profile-card { box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+        .modal-overlay.active .profile-card { transform: scale(1) translateY(0); }
+        .profile-card::-webkit-scrollbar { width: 8px; }
+        .profile-card::-webkit-scrollbar-track { background: transparent; }
+        .profile-card::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        .close-modal { position: absolute; top: 24px; right: 24px; width: 36px; height: 36px; background: var(--surface-bg); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-body); font-size: 22px; transition: all 0.3s; }
+        .close-modal:hover { background: var(--border); color: var(--text-title); transform: rotate(90deg); }
+
+        .modal-header { display: flex; align-items: center; gap: 40px; margin-bottom: 50px; }
+        .modal-header img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); box-shadow: var(--shadow); transition: transform 0.4s; }
+        .modal-header img:hover { transform: scale(1.05) rotate(-2deg); }
+        .modal-header h2 { font-size: 40px; color: var(--text-title); letter-spacing: -0.01em; margin-bottom: 8px; font-weight: 700; }
+        .modal-header p { font-size: 16px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .modal-section-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-body); margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 50px; }
+        .detail-item { transition: transform 0.3s ease; }
+        .detail-item:hover { transform: translateX(5px); }
+        .detail-item p.label { font-size: 13px; color: var(--text-body); margin-bottom: 4px; }
+        .detail-item p.value { font-size: 17px; color: var(--text-title); font-weight: 500; }
+        .full-width { grid-column: 1 / -1; }
+
+        .lang-list { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 50px; }
+        .lang-row { display: flex; justify-content: space-between; align-items: center; background: var(--surface-bg); padding: 18px 24px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.02); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        [data-theme="dark"] .lang-row { border: 1px solid rgba(255,255,255,0.02); }
+        .lang-row:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+        .lang-info { display: flex; flex-direction: column; gap: 4px; }
+        .lang-name { font-weight: 600; font-size: 18px; color: var(--text-title); }
+        .lang-level { font-size: 13px; font-weight: 500; color: var(--text-body); text-transform: uppercase; letter-spacing: 0.02em; }
+        .lang-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+        .lang-tags span { background: var(--card-bg); color: var(--text-title); font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s; cursor: default; }
+        .lang-tags span:hover { background: var(--text-title); color: var(--card-bg); transform: scale(1.05); }
+
+        .edu-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 50px; }
+        .edu-item { display: grid; grid-template-columns: 100px 1fr; gap: 20px; align-items: start; padding: 15px; border-radius: 20px; transition: all 0.3s ease; margin-left: -15px; margin-right: -15px; }
+        .edu-item:hover { background: var(--surface-bg); transform: translateX(5px); }
+        .edu-year { font-size: 14px; font-weight: 600; color: var(--text-body); padding-top: 4px; }
+        .edu-content h4 { font-size: 18px; color: var(--text-title); margin-bottom: 6px; }
+        .edu-content p { font-size: 16px; color: var(--text-body); line-height: 1.5; }
+        .edu-score { display: inline-block; margin-top: 8px; font-size: 14px; font-weight: 600; color: #32d74b; background: rgba(50, 215, 75, 0.1); padding: 4px 12px; border-radius: 12px; }
+
+        /* Layout Utility */
+        .section { padding: 160px 20px; max-width: 1060px; margin: 0 auto; }
+        .text-center { text-align: center; }
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* Hero */
+        .hero { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 90vh; padding-top: 80px; }
+        .hero .t-headline { margin-top: 10px; margin-bottom: 30px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 80px; border-top: 1px solid var(--border); padding-top: 60px; width: 100%; }
+        .stat-item { text-align: center; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .stat-item:hover { transform: translateY(-10px) scale(1.02); }
+        .stat-num { font-size: 48px; font-weight: 600; color: var(--text-title); letter-spacing: -0.003em; }
+        .stat-label { font-size: 14px; color: var(--text-body); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 5px; }
+
+        /* --- STABLE ZIG-ZAG TIMELINE --- */
+        .timeline { position: relative; width: 100%; max-width: 1200px; margin: 80px auto 0; padding: 40px 0; display: flex; flex-direction: column; gap: 40px; }
+        
+        .timeline::before { 
+            content: ''; position: absolute; width: 2px; background: var(--border); 
+            top: 0; bottom: 0; left: 50%; transform: translateX(-50%); z-index: 1; 
+        }
+
+        .timeline-item { position: relative; width: 50%; z-index: 2; display: flex; align-items: flex-start; }
+        
+        /* Left Side Cards */
+        .timeline-item.left { left: 0; padding-right: 50px; justify-content: flex-end; }
+        .timeline-item.left::after {
+            content: ''; position: absolute; width: 16px; height: 16px; background-color: var(--accent); 
+            border: 8px solid var(--page-bg); border-radius: 50%; top: 40px; right: -16px; z-index: 3; 
+            box-shadow: 0 0 0 1px var(--border); transition: transform 0.3s;
+        }
+        
+        /* Right Side Cards */
+        .timeline-item.right { left: 50%; padding-left: 50px; justify-content: flex-start; }
+        .timeline-item.right::after {
+            content: ''; position: absolute; width: 16px; height: 16px; background-color: var(--accent); 
+            border: 8px solid var(--page-bg); border-radius: 50%; top: 40px; left: -16px; z-index: 3; 
+            box-shadow: 0 0 0 1px var(--border); transition: transform 0.3s;
+        }
+
+        [data-theme="dark"] .timeline-item::after { box-shadow: 0 0 0 1px rgba(255,255,255,0.15); }
+        .timeline-item:hover::after { transform: scale(1.3); }
+
+        .timeline-card { 
+            background: var(--card-bg); border: 1px solid var(--border); padding: 40px; 
+            border-radius: 28px; box-shadow: var(--shadow); text-align: left; 
+            position: relative; overflow: hidden; width: 100%; max-width: 600px; 
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s, border-color 0.3s; 
+            cursor: default; 
+        }
+        .timeline-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.08); }
+        [data-theme="dark"] .timeline-card:hover { box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+        .timeline-card.active { border-color: var(--accent); }
+
+        .timeline-year { font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; display: block; }
+        .timeline-card h3 { font-size: 28px; color: var(--text-title); margin-bottom: 6px; }
+        .timeline-company { font-size: 18px; font-weight: 600; color: var(--text-body); margin-bottom: 16px; }
+        .timeline-card p.summary { color: var(--text-body); font-size: 17px; line-height: 1.5; margin: 0; }
+
+        /* Detail Toggle Button */
+        .explore-hint { 
+            display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; 
+            background: var(--surface-bg); border-radius: 20px; border: 1px solid rgba(0,0,0,0.02);
+            color: var(--accent); font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em;
+            cursor: pointer; transition: 0.3s; margin-top: 24px; user-select: none; border: none; font-family: inherit;
+        }
+        [data-theme="dark"] .explore-hint { border: 1px solid rgba(255,255,255,0.02); }
+        .explore-hint:hover { background: var(--border); transform: translateY(-2px); }
+        .explore-hint i { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .timeline-card.active .explore-hint i { transform: rotate(180deg); }
+
+        /* Inline Expanding Gallery */
+        .gallery-wrapper {
+            display: grid; grid-template-rows: 0fr; opacity: 0;
+            transition: grid-template-rows 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, margin-top 0.4s ease;
+        }
+        .timeline-card.active .gallery-wrapper { grid-template-rows: 1fr; opacity: 1; margin-top: 24px; }
+        .gallery-inner { overflow: hidden; position: relative; } 
+        
+        .gallery-top-border { border-top: 1px solid var(--border); padding-top: 30px; position: relative; }
+        .scroll-hint { font-size: 12px; color: var(--text-body); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; font-weight: 600; }
+        .scroll-hint i { animation: slideRight 1.5s infinite; }
+        @keyframes slideRight { 0% { transform: translateX(0); } 50% { transform: translateX(5px); } 100% { transform: translateX(0); } }
+
+        /* Native Horizontal Scroll */
+        .horizontal-scroll {
+            display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px;
+            scroll-snap-type: x mandatory; scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Custom Apple-Style Scrollbar */
+        .horizontal-scroll::-webkit-scrollbar { height: 8px; }
+        .horizontal-scroll::-webkit-scrollbar-track { background: var(--surface-bg); border-radius: 10px; }
+        .horizontal-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; border: 2px solid var(--surface-bg); }
+        .horizontal-scroll::-webkit-scrollbar-thumb:hover { background: var(--text-body); }
+        
+        /* Wider Details Cards */
+        .g-card {
+            min-width: 340px; width: 340px; flex-shrink: 0; background: var(--surface-bg); 
+            border-radius: 20px; padding: 30px; scroll-snap-align: start; 
+            border: 1px solid rgba(0,0,0,0.03); display: flex; flex-direction: column; gap: 12px; transition: transform 0.3s ease;
+        }
+        [data-theme="dark"] .g-card { border: 1px solid rgba(255,255,255,0.03); }
+        .g-card:hover { transform: translateY(-3px); }
+        
+        .g-card i.icon { font-size: 22px; color: var(--accent); margin-bottom: 4px; padding: 12px; background: rgba(0, 102, 204, 0.1); border-radius: 12px; display: inline-table;}
+        .g-card h4 { font-size: 15px; color: var(--text-title); text-transform: uppercase; letter-spacing: 0.05em; margin: 0; font-weight: 700;}
+        .g-card p { font-size: 16px; color: var(--text-body); line-height: 1.6; margin: 0; }
+        
+        .gallery-img-real { width: 100%; height: 180px; border-radius: 12px; object-fit: cover; border: 1px solid var(--border); }
+        .gallery-img { width: 100%; height: 180px; border-radius: 12px; object-fit: cover; background: var(--card-bg); border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-body); flex-direction: column; gap: 8px;}
+
+        /* --- The Triad --- */
+        .bento-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 60px; align-items: start; max-width: 1060px; margin-left: auto; margin-right: auto;}
+        .bento-card { background: var(--card-bg); border-radius: 32px; padding: 40px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s; }
+        .bento-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.08); }
+        [data-theme="dark"] .bento-card:hover { box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+        .triad-icon { font-size: 32px; color: var(--accent); margin-bottom: 24px; display: inline-flex; padding: 16px; background: rgba(41, 151, 255, 0.1); border-radius: 20px; transition: transform 0.4s ease; }
+        .bento-card:hover .triad-icon { transform: scale(1.1) rotate(5deg); }
+        .bento-card h3 { margin-bottom: 30px; color: var(--text-title); font-size: 28px; }
+        .accordion-item { border-bottom: 1px solid var(--border); padding: 16px 0; cursor: pointer; }
+        .accordion-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .accordion-header { display: flex; justify-content: space-between; align-items: center; transition: color 0.3s; }
+        .accordion-header h4 { font-size: 17px; font-weight: 600; color: var(--text-title); transition: color 0.3s; }
+        .accordion-header i { font-size: 14px; color: var(--text-body); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s; }
+        .accordion-item:hover .accordion-header h4, .accordion-item:hover .accordion-header i { color: var(--accent); }
+        .accordion-content { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease; }
+        .accordion-content p { font-size: 15px; color: var(--text-body); line-height: 1.5; margin: 0; }
+        .accordion-item.active .accordion-header h4 { color: var(--accent); }
+        .accordion-item.active .accordion-header i { transform: rotate(180deg); color: var(--accent); }
+        .accordion-item.active .accordion-content { max-height: 200px; opacity: 1; margin-top: 12px; }
+
+        /* 3D Comb Section */
+        .comb-container { display: grid; grid-template-columns: 1fr 350px; gap: 40px; margin-top: 60px; background: var(--card-bg); border-radius: 32px; padding: 40px; box-shadow: var(--shadow); border: 1px solid var(--border); min-height: 500px; max-width: 1060px; margin-left: auto; margin-right: auto;}
+        #canvas-container { width: 100%; height: 450px; background: var(--page-bg); border-radius: 20px; position: relative; overflow: hidden; border: 1px solid var(--border); cursor: grab; }
+        #canvas-container:active { cursor: grabbing; }
+        .comb-sidebar { display: flex; flex-direction: column; justify-content: center; }
+        .comb-sidebar h3 { margin: 0; transition: color 0.3s; font-size: 24px;}
+        .comb-sidebar p { font-size: 16px; color: var(--text-body); line-height: 1.5; margin-bottom: 30px; }
+        .mini-chart-wrapper { width: 100%; height: 200px; position: relative; }
+
+        /* --- Filterable Chart Section --- */
+        .chart-wrapper { background: var(--card-bg); border-radius: 32px; padding: 40px; box-shadow: var(--shadow); margin-top: 60px; border: 1px solid var(--border); max-width: 1060px; margin-left: auto; margin-right: auto;}
+        .chart-filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 40px; }
+        .chart-filter { background: var(--surface-bg); border: 1px solid var(--border); padding: 10px 20px; border-radius: 24px; color: var(--text-body); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; align-items: center; gap: 8px; opacity: 0.6; }
+        .chart-filter::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: var(--dot-color); transition: 0.3s; opacity: 0.5; }
+        .chart-filter.active { color: var(--text-title); border-color: var(--border); background: var(--card-bg); box-shadow: 0 4px 12px rgba(0,0,0,0.05); opacity: 1; }
+        [data-theme="dark"] .chart-filter.active { box-shadow: 0 4px 12px rgba(0,0,0,0.4); border-color: var(--border); background: var(--surface-bg); }
+        .chart-filter.active::before { opacity: 1; box-shadow: 0 0 8px var(--dot-color); }
+        .chart-filter:hover { opacity: 1; }
+        .chart-container { position: relative; height: 400px; width: 100%; }
+        .slider-container { margin-top: 40px; display: flex; flex-direction: column; align-items: center; }
+        input[type=range] { -webkit-appearance: none; width: 100%; max-width: 400px; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 28px; width: 28px; border-radius: 50%; background: #ffffff; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; margin-top: -12px; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        [data-theme="dark"] input[type=range]::-webkit-slider-thumb { background: #d2d2d7; }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+        input[type=range]::-webkit-slider-thumb:active { transform: scale(1.25); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: var(--border); border-radius: 3px; }
+        .slider-label { font-size: 17px; font-weight: 600; margin-top: 20px; color: var(--text-title); }
+
+        /* --- Apps Grid --- */
+        .apps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 60px; max-width: 1060px; margin-left: auto; margin-right: auto;}
+        .app-card { background: var(--surface-bg); border-radius: 32px; padding: 40px 30px; border: 1px solid rgba(0,0,0,0.03); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s, border-color 0.4s; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 15px; cursor: pointer; text-decoration: none; }
+        [data-theme="dark"] .app-card { border: 1px solid rgba(255,255,255,0.03); }
+        .app-card:hover { transform: translateY(-8px); box-shadow: var(--shadow); border-color: var(--accent); background: var(--card-bg); }
+        .app-icon-wrapper { width: 70px; height: 70px; background: var(--card-bg); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 32px; color: var(--accent); box-shadow: 0 8px 20px rgba(0,0,0,0.08); margin-bottom: 10px; transition: transform 0.4s; }
+        .app-card:hover .app-icon-wrapper { transform: scale(1.1) rotate(5deg); }
+        .app-card h3 { font-size: 22px; color: var(--text-title); font-weight: 600; }
+        .app-card p { font-size: 15px; color: var(--text-body); line-height: 1.5; }
+
+        /* --- Contact Section --- */
+        .contact-box { background: var(--card-bg); border-radius: 40px; padding: 80px 40px; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border); margin-top: 40px; max-width: 1060px; margin-left: auto; margin-right: auto;}
+        .contact-link { font-size: 4vw; font-weight: 700; color: var(--text-title); text-decoration: none; display: inline-block; margin: 20px 0; letter-spacing: -0.02em; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s; white-space: nowrap; }
+        .contact-link:hover { color: var(--accent); transform: scale(1.05); }
+        .phone-link { color: var(--text-body); text-decoration: none; transition: color 0.3s ease; }
+        .phone-link:hover { color: var(--accent); }
+        .social-links { display: flex; justify-content: center; gap: 24px; margin-top: 40px; }
+        .social-btn { width: 64px; height: 64px; border-radius: 50%; background: var(--surface-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--text-title); text-decoration: none; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s, color 0.3s; border: 1px solid var(--border); }
+        .social-btn:hover { background: var(--text-title); color: var(--page-bg); transform: translateY(-8px) scale(1.1); }
+
+        footer { margin: 0; padding: 60px 20px 80px 20px; border-top: 1px solid var(--border); text-align: center; color: var(--text-body); font-size: 14px;}
+
+        @media (max-width: 1024px) {
+            .comb-container { grid-template-columns: 1fr; }
+            .contact-link { font-size: 36px; }
+            
+            /* Mobile Timeline Stacking (No Split) */
+            .timeline::before { left: 30px; transform: none; margin-left: -1px; }
+            .timeline-item.left, .timeline-item.right { width: 100%; left: 0; padding: 0 0 0 70px; justify-content: flex-start; margin-bottom: 40px; }
+            .timeline-item.left::after, .timeline-item.right::after { left: 14px; right: auto; top: 30px; }
+            .timeline-card { max-width: 100%; padding: 30px 20px; }
+        }
+
+        @media (max-width: 834px) {
+            nav { padding: 0 20px; }
+            .nav-links { display: none; }
+            .t-headline { font-size: 56px; }
+            .t-title-1 { font-size: 40px; }
+            .section { padding: 100px 20px; }
+            .stats-grid { grid-template-columns: 1fr; gap: 30px; }
+            .profile-card { width: 95%; padding: 40px 30px; }
+            .modal-header { flex-direction: column; text-align: center; gap: 20px; }
+            .details-grid { grid-template-columns: 1fr; gap: 16px; }
+            .lang-row { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .edu-item { grid-template-columns: 1fr; gap: 5px; }
+            .chart-filters { flex-direction: column; align-items: stretch; }
+            .contact-box { padding: 60px 20px; }
+            .contact-link { font-size: 28px; }
+            
+            /* Mobile Timeline Scaling */
+            .timeline::before { left: 20px; }
+            .timeline-item.left::after, .timeline-item.right::after { left: 4px; }
+            .timeline-item.left, .timeline-item.right { padding-left: 60px; }
+            .timeline-card { padding: 30px 20px; }
+            .g-card { min-width: 280px; width: 280px; padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="modal-overlay" id="profileModal">
+        <div class="profile-card">
+            <button class="close-modal" id="closeModalBtn" aria-label="Close Profile"><i class="fas fa-times"></i></button>
+            <div class="modal-header">
+                <img src="assets/profile.png" alt="Suraj Kumar" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23a1a1a6\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'">
+                <div><h2>Suraj Kumar</h2><p>Director & Engineer</p></div>
+            </div>
+            
+            <div class="modal-section-title">Personal Details</div>
+            <div class="details-grid">
+                <div class="detail-item"><p class="label">Age</p><p class="value">27 Years</p></div>
+                <div class="detail-item"><p class="label">Location</p><p class="value">Chennai, India</p></div>
+                <div class="detail-item full-width"><p class="label">Address</p><p class="value">No 12 Thiruvalluvar Street, Royapettah, Chennai - 600014</p></div>
+            </div>
+
+            <div class="modal-section-title">Communication Hub</div>
+            <div class="lang-list">
+                <div class="lang-row">
+                    <div class="lang-info"><span class="lang-name">English</span><span class="lang-level">Full Proficiency</span></div>
+                    <div class="lang-tags"><span>Read</span><span>Write</span><span>Speak</span></div>
+                </div>
+                <div class="lang-row">
+                    <div class="lang-info"><span class="lang-name">Hindi</span><span class="lang-level">Full Proficiency</span></div>
+                    <div class="lang-tags"><span>Read</span><span>Write</span><span>Speak</span></div>
+                </div>
+                <div class="lang-row">
+                    <div class="lang-info"><span class="lang-name">Tamil</span><span class="lang-level">Advanced Proficiency</span></div>
+                    <div class="lang-tags"><span>Read</span><span>Write</span><span>Speak</span></div>
+                </div>
+            </div>
+
+            <div class="modal-section-title">Education</div>
+            <div class="edu-list">
+                <div class="edu-item">
+                    <div class="edu-year">2015 – 2019</div>
+                    <div class="edu-content"><h4>Anna University, ACT Campus</h4><p>Bachelor’s Degree in Ceramic Technology (B. Tech) | Chennai, India</p><span class="edu-score">Achieved: 95.1%</span></div>
+                </div>
+                <div class="edu-item">
+                    <div class="edu-year">2014 – 2015</div>
+                    <div class="edu-content"><h4>Kesari Higher Secondary School</h4><p>Higher Secondary Examination | Chennai, India</p><span class="edu-score">Achieved: 95.8%</span></div>
+                </div>
+                <div class="edu-item">
+                    <div class="edu-year">2012 – 2013</div>
+                    <div class="edu-content"><h4>Kesari Higher Secondary School</h4><p>Secondary School Leaving Examination | Chennai, India</p><span class="edu-score">Achieved: 92.6%</span></div>
+                </div>
+            </div>
+
+            <div class="modal-section-title">Interests & Hobbies</div>
+            <div class="lang-tags" style="margin-bottom: 20px;">
+                <span>Science Fiction Literature and Movies</span>
+                <span>3D Modelling</span>
+                <span>Presentations</span>
+                <span>Cricket</span>
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <div style="flex: 1;"></div>
+        <div class="nav-links" id="navLinks">
+            <a href="#home">Overview</a>
+            <a href="#timeline">Experience</a>
+            <a href="#triad">Triad</a>
+            <a href="#axis">Expertise Axis</a>
+            <a href="#skills">Growth</a>
+            <a href="#apps">Apps</a>
+            <a href="#contact">Contact</a>
+        </div>
+        <div class="nav-actions" style="flex: 1;">
+            <button class="theme-toggle" id="themeBtn" aria-label="Toggle Theme">
+                <svg viewBox="0 0 24 24"><path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zM12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8V4z"/></svg>
+            </button>
+            <div class="profile-btn" id="openModalBtn">
+                <img src="assets/profile.png" alt="Profile" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23a1a1a6\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'">
+            </div>
+        </div>
+    </nav>
+
+    <section id="home" class="hero section text-center">
+        <span class="t-eyebrow reveal">Star Performer 2022</span>
+        <h1 class="t-headline reveal" style="transition-delay: 0.1s;">Suraj Kumar.</h1>
+        <p class="t-intro reveal" style="transition-delay: 0.2s;">A tech-savvy, curious learner driven by a thirst for knowledge. Dedicated to maximizing job satisfaction and personal development through a tireless work ethic and exploring the cutting-edge of technology.</p>
+        
+        <div class="stats-grid reveal" style="transition-delay: 0.3s;">
+            <div class="stat-item">
+                <div class="stat-num">+€610K</div>
+                <div class="stat-label">Sales Revenue YTD</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">95.1%</div>
+                <div class="stat-label">B.Tech Ceramic Technology</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">+400%</div>
+                <div class="stat-label">Social Growth</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="timeline" class="section">
+        <div class="text-center reveal">
+            <h2 class="t-title-1">Professional History.</h2>
+            <p class="t-intro" style="margin-top: 15px;">Explore how I master the fundamentals before application.</p>
+        </div>
+
+        <div class="timeline">
+            
+            <div class="timeline-item left reveal" id="item1">
+                <div class="timeline-marker"></div>
+                <div class="timeline-card">
+                    <span class="timeline-year">2025 - Present</span>
+                    <h3>Director & Head</h3>
+                    <div class="timeline-company">IRF APAC PVT LTD</div>
+                    <p class="summary">Spearheaded the establishment of IRF APAC from the ground up, transforming it into a revenue-generating entity poised to disrupt a monopolistic market in hot repair services.</p>
+                    
+                    <button type="button" class="explore-hint" onclick="window.toggleTimelineRow('item1')">Explore Details <i class="fas fa-chevron-down"></i></button>
+                    
+                    <div class="gallery-wrapper" onclick="event.stopPropagation()">
+                        <div class="gallery-inner">
+                            <div class="gallery-top-border">
+                                <div class="scroll-hint">Swipe / Scroll <i class="fas fa-arrow-right"></i></div>
+                                <div class="horizontal-scroll" id="scroll1">
+                                    <div class="g-card">
+                                        <img src="assets/irf_setup.jpg" alt="IRF Setup" class="gallery-img-real" onerror="this.outerHTML='<div class=\'gallery-img\'><i class=\'fas fa-building\' style=\'font-size: 32px; margin-bottom: 10px;\'></i><span>[ assets/irf_setup.jpg ]</span></div>'">
+                                    </div>
+                                    <div class="g-card">
+                                        <i class="icon fas fa-cogs"></i>
+                                        <h4>The Foundation</h4>
+                                        <p>Independently managed third-party vendors and contractors to establish a fully operational corporate office and strategic warehouse, setting the stage to serve India and Southeast Asian markets.</p>
+                                    </div>
+                                    <div class="g-card">
+                                        <i class="icon fas fa-rocket"></i>
+                                        <h4>The Application</h4>
+                                        <p>Successfully transitioned the startup into a revenue-generating powerhouse, fully capable of delivering specialized hot repair services to glassmakers and directly challenging existing market monopolies.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item right reveal" id="item2">
+                <div class="timeline-marker"></div>
+                <div class="timeline-card">
+                    <span class="timeline-year">2024 - 2025</span>
+                    <h3>Freelance Consultant</h3>
+                    <div class="timeline-company">IRF</div>
+                    <p class="summary">Recruited to lay the groundwork for establishing IRF in India, handling core administrative research while developing automation solutions for technical services.</p>
+                    
+                    <button type="button" class="explore-hint" onclick="window.toggleTimelineRow('item2')">Explore Details <i class="fas fa-chevron-down"></i></button>
+                    
+                    <div class="gallery-wrapper" onclick="event.stopPropagation()">
+                        <div class="gallery-inner">
+                            <div class="gallery-top-border">
+                                <div class="scroll-hint">Swipe / Scroll <i class="fas fa-arrow-right"></i></div>
+                                <div class="horizontal-scroll" id="scroll2">
+                                    <div class="g-card">
+                                        <img src="assets/supply_chain.jpg" alt="Supply Chain" class="gallery-img-real" onerror="this.outerHTML='<div class=\'gallery-img\'><i class=\'fas fa-network-wired\' style=\'font-size: 32px; margin-bottom: 10px;\'></i><span>[ assets/supply_chain.jpg ]</span></div>'">
+                                    </div>
+                                    <div class="g-card">
+                                        <i class="icon fas fa-briefcase"></i>
+                                        <h4>The Setup</h4>
+                                        <p>Offered an exclusive opportunity to establish IRF's presence in India. Dedicated the first year to comprehensive administrative activities, market research, and actively exploring legal options to establish the corporate entity.</p>
+                                    </div>
+                                    <div class="g-card">
+                                        <i class="icon fas fa-laptop-code"></i>
+                                        <h4>The Automation</h4>
+                                        <p>Engineered automated solutions for the company's technical operations. I developed systems for automated endoscopy reports and completely upgraded corporate presentations to align with global standards.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item left reveal" id="item3">
+                <div class="timeline-marker"></div>
+                <div class="timeline-card">
+                    <span class="timeline-year">2019 - 2024</span>
+                    <h3>Sales & Marketing Exec</h3>
+                    <div class="timeline-company">Saint-Gobain | SEFPRO Care</div>
+                    <p class="summary">Joined as a GET and rose to lead the SEFPRO Care division. Scaled revenue from €20K to €600K+ through on-site cold repair execution, global client management, and viral 3D marketing campaigns.</p>
+                    
+                    <button type="button" class="explore-hint" onclick="window.toggleTimelineRow('item3')">Explore Details <i class="fas fa-chevron-down"></i></button>
+                    
+                    <div class="gallery-wrapper" onclick="event.stopPropagation()">
+                        <div class="gallery-inner">
+                            <div class="gallery-top-border">
+                                <div class="scroll-hint">Swipe / Scroll <i class="fas fa-arrow-right"></i></div>
+                                <div class="horizontal-scroll" id="scroll3">
+                                    <div class="g-card">
+                                        <img src="assets/3d_animation.jpg" alt="3D Animation" class="gallery-img-real" onerror="this.outerHTML='<div class=\'gallery-img\'><i class=\'fas fa-cube\' style=\'font-size: 32px; margin-bottom: 10px;\'></i><span>[ assets/3d_animation.jpg ]</span></div>'">
+                                    </div>
+                                    <div class="g-card">
+                                        <i class="icon fas fa-graduation-cap"></i>
+                                        <h4>The Beginning</h4>
+                                        <p>Started as a Graduate Engineer Trainee, dedicating my first year to intense data analysis and market study to master glass furnace operations. The following year, I was entrusted with the SEFPRO Care division.</p>
+                                    </div>
+                                    <div class="g-card">
+                                        <i class="icon fas fa-hard-hat"></i>
+                                        <h4>On-Site Execution</h4>
+                                        <p>Volunteered to personally execute cold repairs on-site. Successfully managed a massive, resource-constrained repair in Kadapa independently for a month (the furnace is still running perfectly), alongside time-bound fast-paced repairs in Gujarat.</p>
+                                    </div>
+                                    <div class="g-card">
+                                        <i class="icon fas fa-bullhorn"></i>
+                                        <h4>Digital Marketing & 3D</h4>
+                                        <p>Spearheaded digital marketing by creating technical brochures and aesthetic 3D process/product animations. My organic LinkedIn campaigns achieved viral reach with 20,000+ views in weeks, securing me the Star Performer 2022 award.</p>
+                                    </div>
+                                    <div class="g-card">
+                                        <i class="icon fas fa-globe"></i>
+                                        <h4>Global Reach & Revenue</h4>
+                                        <p>Scaled division revenue from €20,000 to €600,000 by year 5. Presented at major national Glass Association conferences, managed global clients, and conducted technical supervision in Malaysia, France, and Poland.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item right reveal" id="item4">
+                <div class="timeline-marker"></div>
+                <div class="timeline-card">
+                    <span class="timeline-year">2018 - 2019</span>
+                    <h3>Eng. Design Intern & Project</h3>
+                    <div class="timeline-company">IIT MADRAS</div>
+                    <p class="summary">Developed topology-optimized, TPMS-based lattice structure designs for bone implant applications using CAD. Validated using ANSYS FEA software.</p>
+                    
+                    <button type="button" class="explore-hint" onclick="window.toggleTimelineRow('item4')">Explore Details <i class="fas fa-chevron-down"></i></button>
+                    
+                    <div class="gallery-wrapper" onclick="event.stopPropagation()">
+                        <div class="gallery-inner">
+                            <div class="gallery-top-border">
+                                <div class="scroll-hint">Swipe / Scroll <i class="fas fa-arrow-right"></i></div>
+                                <div class="horizontal-scroll" id="scroll4">
+                                    <div class="g-card" style="min-width: 340px;">
+                                        <div id="gyroid-canvas-container" style="width: 100%; height: 180px; border-radius: 12px; background: var(--page-bg); border: 1px solid var(--border); overflow: hidden; cursor: grab;"></div>
+                                        <p style="text-align: center; font-size: 12px; color: var(--accent); margin-top: 8px;"><i class="fas fa-cube"></i> Interactive TPMS Model</p>
+                                    </div>
+                                    <div class="g-card">
+                                        <img src="assets/bone.png" alt="Bone Scaffold" class="gallery-img-real" style="object-fit: contain; padding: 10px;" onerror="this.outerHTML='<div class=\'gallery-img\'><i class=\'fas fa-bone\' style=\'font-size: 32px; margin-bottom: 10px;\'></i><span>[ assets/bone.png ]</span></div>'">
+                                    </div>
+                                    <div class="g-card">
+                                        <i class="icon fas fa-atom"></i>
+                                        <h4>The Fundamentals</h4>
+                                        <p>Additive manufacturing requires tailored mechanical properties to match bone performance. I explored Triply Periodic Minimal Surfaces (TPMS) with zero mean curvature, mapping them to biocompatible Ti-6Al-4V alloy.</p>
+                                    </div>
+                                    <div class="g-card">
+                                        <i class="icon fas fa-cogs"></i>
+                                        <h4>The Methodology</h4>
+                                        <p>Structures were mathematically generated using <strong>Autodesk Monolith</strong> and <strong>Fusion 360</strong>. After converting STL to STP, I applied rigid plates, meshing, and boundary conditions for a 1 MPa compression simulation in ANSYS.</p>
+                                    </div>
+                                    <div class="g-card">
+                                        <i class="icon fas fa-chart-line"></i>
+                                        <h4>Results & Gibson-Ashby</h4>
+                                        <p>I calculated effective elastic moduli via Hooke's Law and located fracture sites using Von-Mises stress. The resulting Gibson-Ashby model proved the scaffolds perfectly mimic real bone, successfully avoiding the stress shielding effect.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item left reveal" id="item5">
+                <div class="timeline-marker"></div>
+                <div class="timeline-card">
+                    <span class="timeline-year">2017 - 2018</span>
+                    <h3>CTDT Funded Researcher</h3>
+                    <div class="timeline-company">Center of Tech Development & Transfer</div>
+                    <p class="summary">Secured a ₹25,000 project fund to engineer a high-performance supercapacitor by doping electrodes with barium titanate via spin coating.</p>
+                    
+                    <button type="button" class="explore-hint" onclick="window.toggleTimelineRow('item5')">Explore Details <i class="fas fa-chevron-down"></i></button>
+                    
+                    <div class="gallery-wrapper" onclick="event.stopPropagation()">
+                        <div class="gallery-inner">
+                            <div class="gallery-top-border">
+                                <div class="scroll-hint">Swipe / Scroll <i class="fas fa-arrow-right"></i></div>
+                                <div class="horizontal-scroll" id="scroll5">
+                                    <div class="g-card">
+                                        <img src="assets/supercapacitor.jpg" alt="Supercapacitor" class="gallery-img-real" onerror="this.outerHTML='<div class=\'gallery-img\'><i class=\'fas fa-microchip\' style=\'font-size: 32px; margin-bottom: 10px;\'></i><span>[ assets/supercapacitor.jpg ]</span></div>'">
+                                    </div>
+                                    <div class="g-card">
+                                        <i class="icon fas fa-flask"></i>
+                                        <h4>The Fundamentals</h4>
+                                        <p>Explored the future of energy storage. Supercapacitors offer rapid recharge cycles compared to batteries. I investigated how adding high dielectric ceramic materials (like TiO<sub>2</sub>) to activated porous carbon electrodes enhances charge storage capabilities.</p>
+                                    </div>
+                                    <div class="g-card">
+                                        <i class="icon fas fa-vial"></i>
+                                        <h4>The Methodology</h4>
+                                        <p>Synthesized highly porous activated carbon. Fabricated standard and TiO<sub>2</sub>-doped electrode plates via spin coating, assembling them into supercapacitor casings, and conducted controlled voltage charging and discharge time analysis.</p>
+                                    </div>
+                                    <div class="g-card">
+                                        <i class="icon fas fa-bolt"></i>
+                                        <h4>Results & Application</h4>
+                                        <p>The TiO<sub>2</sub> doped supercapacitor achieved a remarkable specific capacitance of <strong>26.8 F/g</strong> compared to the standard <strong>19.9 F/g</strong>. This proved the viability of ceramic dopants for vastly improved energy storage capabilities.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item right reveal" id="item6">
+                <div class="timeline-marker"></div>
+                <div class="timeline-card">
+                    <span class="timeline-year">2017</span>
+                    <h3>In-plant Project Trainee</h3>
+                    <div class="timeline-company">CUMI Abrasives</div>
+                    <p class="summary">A Study on Increasing the Hardness of Vitrified Bond by some Additives to enhance the durability and strength of vitrified abrasive wheels.</p>
+                    
+                    <button type="button" class="explore-hint" onclick="window.toggleTimelineRow('item6')">Explore Details <i class="fas fa-chevron-down"></i></button>
+                    
+                    <div class="gallery-wrapper" onclick="event.stopPropagation()">
+                        <div class="gallery-inner">
+                            <div class="gallery-top-border">
+                                <div class="scroll-hint">Swipe / Scroll <i class="fas fa-arrow-right"></i></div>
+                                <div class="horizontal-scroll" id="scroll6">
+                                    <div class="g-card">
+                                        <img src="assets/cumi.jpg" alt="CUMI Abrasives" class="gallery-img-real" onerror="this.outerHTML='<div class=\'gallery-img\'><i class=\'fas fa-industry\' style=\'font-size: 32px; margin-bottom: 10px;\'></i><span>[ assets/cumi.jpg ]</span></div>'">
+                                    </div>
+                                    <div class="g-card">
+                                        <i class="icon fas fa-vial"></i>
+                                        <h4>The Fundamentals</h4>
+                                        <p>Worked on optimizing vitrified abrasive wheels by analyzing the effects of specific additives. The primary objective was to drastically increase the overall hardness, toughness, and tensile strength of the vitrified bond matrix.</p>
+                                    </div>
+                                    <div class="g-card">
+                                        <i class="icon fas fa-microscope"></i>
+                                        <h4>Methodology & Results</h4>
+                                        <p>One of the tested additives successfully amplified the hardness of the vitrified bond. This was precisely measured using a Vickers Hardness apparatus, and the enhancement in mechanical properties was further verified through rigorous Modulus of Rupture testing.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="triad" class="section">
+        <div class="text-center reveal">
+            <h2 class="t-title-1">The Triad.</h2>
+            <p class="t-intro" style="margin-top: 15px;">A balanced mastery of engineering, business, and creative disciplines.</p>
+        </div>
+        <div class="bento-grid">
+            <div class="bento-card reveal">
+                <i class="fas fa-drafting-compass triad-icon"></i>
+                <h3>Engineer</h3>
+                <div class="accordion-item" onclick="window.toggleAccordion(this)">
+                    <div class="accordion-header"><h4>Ceramic Tech (Anna Univ)</h4><i class="fas fa-chevron-down"></i></div>
+                    <div class="accordion-content"><p>Graduated with 95.1% (2nd Top score). Specialized deeply in material science fundamentals. Study on additives for abrasives, supercapacitors, and Lattice structure design.</p></div>
+                </div>
+                <div class="accordion-item" onclick="window.toggleAccordion(this)">
+                    <div class="accordion-header"><h4>IIT Madras Research Intern</h4><i class="fas fa-chevron-down"></i></div>
+                    <div class="accordion-content"><p>Designed and simulated TPMS lattice structures for bone implants. Validated mechanical properties using Ansys FEA.</p></div>
+                </div>
+                <div class="accordion-item" onclick="window.toggleAccordion(this)">
+                    <div class="accordion-header"><h4>Ansys FEA Validation</h4><i class="fas fa-chevron-down"></i></div>
+                    <div class="accordion-content"><p>Conducted rigorous thermal and structural analysis validation for complex geometric models.</p></div>
+                </div>
+            </div>
+            <div class="bento-card reveal" style="transition-delay: 0.1s;">
+                <i class="fas fa-handshake triad-icon" style="color: var(--accent-alt); background: rgba(191, 90, 242, 0.1);"></i>
+                <h3>Executive</h3>
+                <div class="accordion-item" onclick="window.toggleAccordion(this)">
+                    <div class="accordion-header"><h4>Director, IRF APAC (2025)</h4><i class="fas fa-chevron-down"></i></div>
+                    <div class="accordion-content"><p>Independently established the company from the ground up and managed all complex regional compliance.</p></div>
+                </div>
+                <div class="accordion-item" onclick="window.toggleAccordion(this)">
+                    <div class="accordion-header"><h4>Freelance Consultant (2024)</h4><i class="fas fa-chevron-down"></i></div>
+                    <div class="accordion-content"><p>Strategic consulting for manufacturing logistics and high-level supply chain optimization.</p></div>
+                </div>
+                <div class="accordion-item" onclick="window.toggleAccordion(this)">
+                    <div class="accordion-header"><h4>Saint-Gobain Sales Lead</h4><i class="fas fa-chevron-down"></i></div>
+                    <div class="accordion-content"><p>Managed €610K revenue pipeline and independently optimized 80 tons of stock inventory.</p></div>
+                </div>
+            </div>
+            <div class="bento-card reveal" style="transition-delay: 0.2s;">
+                <i class="fas fa-cube triad-icon" style="color: #32d74b; background: rgba(50, 215, 75, 0.1);"></i>
+                <h3>Creator</h3>
+                <div class="accordion-item" onclick="window.toggleAccordion(this)">
+                    <div class="accordion-header"><h4>Web Development</h4><i class="fas fa-chevron-down"></i></div>
+                    <div class="accordion-content"><p>Expertise in modern HTML, CSS, and vanilla JS with a heavy focus on frontend UI/UX and interactive experiences. <br><br><a href="#apps" style="color: var(--accent); text-decoration: none; font-weight: 500;">View live prototypes &rarr;</a></p></div>
+                </div>
+                <div class="accordion-item" onclick="window.toggleAccordion(this)">
+                    <div class="accordion-header"><h4>3D Product Animation</h4><i class="fas fa-chevron-down"></i></div>
+                    <div class="accordion-content"><p>Translated complex engineering data into engaging 3D visuals for stakeholders, driving massive engagement.</p></div>
+                </div>
+                <div class="accordion-item" onclick="window.toggleAccordion(this)">
+                    <div class="accordion-header"><h4>Blender & Three.js</h4><i class="fas fa-chevron-down"></i></div>
+                    <div class="accordion-content"><p>Expert in procedural modeling and building immersive, interactive web 3D experiences.</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="axis" class="section">
+        <div class="text-center reveal">
+            <h2 class="t-title-1">The Expertise Axis.</h2>
+            <p class="t-intro" style="margin-top: 15px;">The central spine represents foundational engineering, branching into distinct areas of advanced specialization. Click the nodes to view proficiency growth.</p>
+        </div>
+
+        <div class="comb-container reveal">
+            <div id="canvas-container"></div>
+            <div class="comb-sidebar">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
+                    <h3 id="comb-title" style="margin: 0; transition: color 0.3s;">Select a Node</h3>
+                    <span id="comb-prof" style="font-size: 24px; font-weight: 700; color: var(--text-title); transition: opacity 0.3s; opacity: 0;"></span>
+                </div>
+                <p id="comb-desc" style="font-size: 16px; color: var(--text-body); line-height: 1.5; margin-bottom: 30px;">Interact with the 3D models floating around the central axis to view detailed metrics for each vertical.</p>
+                <div class="mini-chart-wrapper">
+                    <canvas id="miniChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills" class="section text-center">
+        <h2 class="t-title-1 reveal">Evolution of Expertise.</h2>
+        <p class="t-intro reveal" style="margin-top: 15px;"><kbd style="font-family: monospace; background: var(--surface-bg); padding: 4px 8px; border-radius: 6px; font-size: 14px; border: 1px solid var(--border);">Ctrl + Click</kbd> to select multiple skills, and scrub the timeline to view progression.</p>
+        
+        <div class="chart-wrapper reveal">
+            <div class="chart-filters" id="chartFilters">
+                <button class="chart-filter active" data-index="0" style="--dot-color: #ff9500;">Presentation Skills</button>
+                <button class="chart-filter active" data-index="1" style="--dot-color: #32d74b;">Data & Power BI</button>
+                <button class="chart-filter active" data-index="2" style="--dot-color: #0066cc;">Sales & Negotiation</button>
+                <button class="chart-filter active" data-index="3" style="--dot-color: #bf5af2;">3D & Marketing</button>
+                <button class="chart-filter active" data-index="4" style="--dot-color: #ff3b30;">Leadership</button>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="growthChart"></canvas>
+            </div>
+            
+            <div class="slider-container">
+                <input type="range" min="2015" max="2026" value="2026" id="yearSlider">
+                <div class="slider-label">Timeline: <span id="yearDisplay">2026</span></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="apps" class="section text-center">
+        <h2 class="t-title-1 reveal">Live Prototypes.</h2>
+        <p class="t-intro reveal" style="margin-top: 15px;">A collection of tools and architectures built from scratch.</p>
+
+        <div class="apps-grid reveal">
+            <a href="assets/htmlstudio.html" target="_blank" class="app-card">
+                <div class="app-icon-wrapper" style="color: #ff9500;"><i class="fas fa-layer-group"></i></div>
+                <h3>HTML Studio</h3>
+                <p>Browser-based visual IDE empowering non-coders to visually construct aesthetic web applications.</p>
+            </a>
+            <a href="assets/holol3.html" target="_blank" class="app-card">
+                <div class="app-icon-wrapper" style="color: #bf5af2;"><i class="fas fa-hand-paper"></i></div>
+                <h3>Holo L3</h3>
+                <p>Platform allowing users to upload 3D models and organically manipulate them via webcam hand tracking.</p>
+            </a>
+            <a href="assets/inote3d.html" target="_blank" class="app-card">
+                <div class="app-icon-wrapper" style="color: #32d74b;"><i class="fas fa-cube"></i></div>
+                <h3>iNote 3D</h3>
+                <p>An aesthetic, spatial note-making engine leveraging three-dimensional organization.</p>
+            </a>
+            <a href="assets/izoompro.html" target="_blank" class="app-card">
+                <div class="app-icon-wrapper" style="color: #0066cc;"><i class="fas fa-expand-arrows-alt"></i></div>
+                <h3>iZoom Pro</h3>
+                <p>Infinite canvas presentation tool for PDF decks and images with dynamic spatial zooming.</p>
+            </a>
+            <a href="assets/jarvis2.html" target="_blank" class="app-card">
+                <div class="app-icon-wrapper" style="color: #00c7b7;"><i class="fas fa-hand-sparkles"></i></div>
+                <h3>Jarvis Particles</h3>
+                <p>Interactive 3D particle system completely controlled via webcam hand tracking and gestures.</p>
+            </a>
+            <a href="assets/MAP.html" target="_blank" class="app-card">
+                <div class="app-icon-wrapper" style="color: #ff3b30;"><i class="fas fa-map-marked-alt"></i></div>
+                <h3>Map CRM</h3>
+                <p>Interactive geographical CRM dashboard with dynamic clustering, data grid, and heatmaps.</p>
+            </a>
+            <a href="assets/text.html" target="_blank" class="app-card">
+                <div class="app-icon-wrapper" style="color: #bf5af2;"><i class="fas fa-font"></i></div>
+                <h3>Word Tunnel FX</h3>
+                <p>3D typography generator and video recording tool for rendering infinite word tunnel animations.</p>
+            </a>
+        </div>
+    </section>
+
+    <section id="contact" class="section">
+        <div class="contact-box reveal">
+            <h2 class="t-eyebrow" style="margin-bottom: 20px; color: var(--text-body);">Initiate Contact</h2>
+            <a href="mailto:suraj451998@gmail.com" class="contact-link">
+                <i class="fas fa-envelope" style="color: var(--accent); margin-right: 15px;"></i>suraj451998@gmail.com
+            </a>
+            <p style="font-size: 20px; color: var(--text-body); margin-top: 10px;">
+                <a href="tel:+917299075829" class="phone-link">
+                    <i class="fas fa-phone-alt" style="color: var(--accent); margin-right: 10px; transform: scaleX(-1); display: inline-block;"></i>+91 7 2 99 075 829
+                </a> 
+                <span style="margin: 0 10px;">|</span> Chennai, India
+            </p>
+            
+            <div class="social-links">
+                <a href="https://www.linkedin.com/in/suraj-kumar-r5829/" class="social-btn" target="_blank" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 Suraj Kumar. All rights reserved.</p>
+    </footer>
+
+    <script type="module">
+        import * as THREE from 'https://cdn.skypack.dev/three@0.128.0';
+        import { OrbitControls } from 'https://cdn.skypack.dev/three@0.128.0/examples/jsm/controls/OrbitControls.js';
+        import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
+        
+        // --- 1. The Expertise Axis Section ---
+        const combContainer = document.getElementById('canvas-container');
+        if(combContainer) {
+            const combScene = new THREE.Scene();
+            const combCamera = new THREE.PerspectiveCamera(45, combContainer.clientWidth / combContainer.clientHeight, 0.1, 100);
+            combCamera.position.set(0, 0, 22); 
+            
+            const combRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            combRenderer.setSize(combContainer.clientWidth, combContainer.clientHeight);
+            combRenderer.setPixelRatio(window.devicePixelRatio);
+            combContainer.appendChild(combRenderer.domElement);
+
+            const combControls = new OrbitControls(combCamera, combRenderer.domElement);
+            combControls.enableDamping = true;
+            combControls.enableZoom = true; 
+            combControls.autoRotate = true;
+            combControls.autoRotateSpeed = 1.0;
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            combScene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 10);
+            combScene.add(directionalLight);
+
+            // Infinite Spine
+            const spineMat = new THREE.MeshStandardMaterial({ color: 0x86868b, roughness: 0.3, metalness: 0.8 });
+            const branchMat = new THREE.MeshStandardMaterial({ color: 0xd2d2d7, roughness: 0.5 });
+            const spineGeo = new THREE.CylinderGeometry(0.15, 0.15, 1000, 32); 
+            const spine = new THREE.Mesh(spineGeo, spineMat);
+            combScene.add(spine);
+
+            const loader = new GLTFLoader();
+
+            // Reordered: Bottom (index 0) to Top (index 8)
+            const verticalsData = [
+                { file: 'salesforce', title: "Salesforce CRM", desc: "Managing global customer relationships, sales pipelines, and regional business operations.", color: 0x00c7b7, shape: 'cone', chartData: [0, 0, 0, 10, 30, 50, 80, 85] },
+                { file: 'spaceclaim', title: "SpaceClaim CAD", desc: "Direct modeling for rapid 3D geometry manipulation and simulation preparation.", color: 0xff9500, shape: 'box', chartData: [0, 10, 30, 50, 60, 75, 85, 95] },
+                { file: 'ansys', title: "Ansys FEA", desc: "Rigorous thermal and structural finite element analysis for mechanical and material validation.", color: 0xff3b30, shape: 'sphere', chartData: [0, 0, 15, 40, 70, 80, 85, 90] },
+                { file: 'fusion360', title: "Autodesk Fusion 360", desc: "Advanced CAD, CAM, and CAE for product design and engineering simulations.", color: 0x0066cc, shape: 'torus', chartData: [10, 25, 45, 60, 75, 80, 85, 90] },
+                { file: 'unreal', title: "Unreal Engine", desc: "Building advanced visual models and high-fidelity interactive environments.", color: 0x00c7b7, shape: 'box', chartData: [0, 0, 10, 30, 50, 60, 70, 80] },
+                { file: 'powerbi', title: "Power BI", desc: "Developing comprehensive dashboards and business intelligence reporting for C-level executives.", color: 0xffcc00, shape: 'box', chartData: [0, 0, 5, 20, 45, 60, 70, 80] },
+                { file: 'excel', title: "Data & Excel", desc: "Advanced data analysis, inventory optimization, and supply chain modeling.", color: 0x32d74b, shape: 'cone', chartData: [20, 30, 40, 50, 70, 80, 85, 90] },
+                { file: 'blender', title: "Blender 3D", desc: "Expertise in procedural modeling, texturing, and physics-based product animation.", color: 0xbf5af2, shape: 'sphere', chartData: [10, 15, 30, 50, 75, 85, 90, 95] },
+                { file: 'ppt', title: "Executive Presentations", desc: "Translating complex engineering data into high-stakes, engaging stakeholder visuals in PowerPoint.", color: 0xff9500, shape: 'torus', chartData: [10, 25, 40, 55, 75, 85, 95, 99] }
+            ];
+
+            const interactableMeshes = [];
+            
+            verticalsData.forEach((data, index) => {
+                const angle = (index / verticalsData.length) * Math.PI * 2;
+                // Dynamically calculates Y spacing so all 9 fit beautifully on screen
+                const yPos = (index - (verticalsData.length - 1) / 2) * 1.5; 
+                
+                const branchLen = 3.0;
+                const branchGeo = new THREE.CylinderGeometry(0.03, 0.03, branchLen, 8);
+                const branch = new THREE.Mesh(branchGeo, branchMat);
+                branch.position.set(Math.cos(angle) * (branchLen/2), yPos, Math.sin(angle) * (branchLen/2));
+                branch.rotation.z = Math.PI / 2;
+                branch.rotation.y = -angle;
+                combScene.add(branch);
+
+                const hitGeo = new THREE.SphereGeometry(1.0, 16, 16);
+                const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+                const hitNode = new THREE.Mesh(hitGeo, hitMat);
+                hitNode.position.set(Math.cos(angle) * branchLen, yPos, Math.sin(angle) * branchLen);
+                hitNode.userData = data;
+                
+                loader.load(`assets/${data.file}.glb`, (gltf) => {
+                    const model = gltf.scene;
+                    
+                    const box = new THREE.Box3().setFromObject(model);
+                    const center = box.getCenter(new THREE.Vector3());
+                    const size = box.getSize(new THREE.Vector3());
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    const scale = 1.0 / maxDim; 
+                    
+                    model.scale.setScalar(scale);
+                    model.position.sub(center.multiplyScalar(scale));
+                    
+                    const pivot = new THREE.Group();
+                    pivot.add(model);
+                    pivot.userData.isModel = true;
+                    hitNode.add(pivot);
+                    
+                }, undefined, (err) => {
+                    let fbGeo;
+                    if(data.shape === 'box') fbGeo = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+                    else if(data.shape === 'sphere') fbGeo = new THREE.SphereGeometry(0.5, 32, 32);
+                    else if(data.shape === 'cone') fbGeo = new THREE.ConeGeometry(0.5, 1, 32);
+                    else fbGeo = new THREE.TorusGeometry(0.4, 0.2, 16, 32);
+
+                    const fbMat = new THREE.MeshStandardMaterial({ color: data.color, roughness: 0.2, metalness: 0.5 });
+                    const fbMesh = new THREE.Mesh(fbGeo, fbMat);
+                    fbMesh.userData.isModel = true;
+                    hitNode.add(fbMesh);
+                });
+
+                interactableMeshes.push(hitNode);
+                combScene.add(hitNode);
+            });
+
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+
+            combContainer.addEventListener('mousemove', (e) => {
+                const rect = combContainer.getBoundingClientRect();
+                mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, combCamera);
+                const intersects = raycaster.intersectObjects(interactableMeshes);
+                combContainer.style.cursor = intersects.length > 0 ? 'pointer' : 'grab';
+            });
+
+            const miniCtx = document.getElementById('miniChart').getContext('2d');
+            let miniChart = new Chart(miniCtx, {
+                type: 'line',
+                data: {
+                    labels: ['2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026'],
+                    datasets: [{ label: 'Proficiency %', data: [0,0,0,0,0,0,0,0], borderColor: '#0066cc', tension: 0.4, fill: true, backgroundColor: 'rgba(0,102,204,0.1)', pointRadius: 0, pointHoverRadius: 6 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { x: { display: false }, y: { min: 0, max: 100, display: false } },
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } }
+                }
+            });
+
+            combContainer.addEventListener('click', (e) => {
+                raycaster.setFromCamera(mouse, combCamera);
+                const intersects = raycaster.intersectObjects(interactableMeshes);
+                
+                if (intersects.length > 0) {
+                    const data = intersects[0].object.userData;
+                    const colorStr = '#' + data.color.toString(16).padStart(6, '0');
+                    
+                    document.getElementById('comb-title').innerText = data.title;
+                    document.getElementById('comb-title').style.color = colorStr;
+                    document.getElementById('comb-desc').innerText = data.desc;
+                    
+                    const profLabel = document.getElementById('comb-prof');
+                    profLabel.innerText = data.chartData[data.chartData.length - 1] + '%';
+                    profLabel.style.color = colorStr;
+                    profLabel.style.opacity = '1';
+                    
+                    miniChart.data.datasets[0].data = data.chartData;
+                    miniChart.data.datasets[0].borderColor = colorStr;
+                    miniChart.data.datasets[0].backgroundColor = `rgba(${(data.color >> 16) & 255}, ${(data.color >> 8) & 255}, ${data.color & 255}, 0.2)`;
+                    miniChart.update();
+                }
+            });
+
+            function animateComb() {
+                requestAnimationFrame(animateComb);
+                combControls.update();
+                
+                // Pure Y-Axis rotation
+                interactableMeshes.forEach(hitNode => { 
+                    hitNode.children.forEach(child => {
+                        if(child.userData && child.userData.isModel) {
+                            child.rotation.y += 0.01; 
+                        }
+                    });
+                });
+                
+                combRenderer.render(combScene, combCamera);
+            }
+            animateComb();
+
+            window.addEventListener('resize', () => {
+                if(combContainer.clientWidth > 0) {
+                    combCamera.aspect = combContainer.clientWidth / combContainer.clientHeight;
+                    combCamera.updateProjectionMatrix();
+                    combRenderer.setSize(combContainer.clientWidth, combContainer.clientHeight);
+                }
+            });
+        }
+
+        // --- 2. The 3D Gyroid Model for IIT Madras Timeline ---
+        function initGyroid() {
+            const gyroidContainer = document.getElementById('gyroid-canvas-container');
+            if(!gyroidContainer) return;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, gyroidContainer.clientWidth / gyroidContainer.clientHeight || 1, 0.1, 100);
+            camera.position.set(0, 0, 5);
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(gyroidContainer.clientWidth || 340, gyroidContainer.clientHeight || 180);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            gyroidContainer.appendChild(renderer.domElement);
+
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 2.0;
+            controls.enableZoom = true;
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(10, 20, 10);
+            scene.add(dirLight);
+            const rimLight = new THREE.DirectionalLight(0xbf5af2, 0.6); 
+            rimLight.position.set(-10, -10, -10);
+            scene.add(rimLight);
+
+            const loader = new GLTFLoader();
+            loader.load('assets/gyroid.glb', (gltf) => {
+                const model = gltf.scene;
+                
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scale = 3 / maxDim;
+                model.scale.setScalar(scale);
+                model.position.sub(center.multiplyScalar(scale));
+
+                scene.add(model);
+            }, undefined, (error) => {
+                const fallbackGeo = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
+                const fallbackMat = new THREE.MeshStandardMaterial({color: 0x0066cc, roughness: 0.2, metalness: 0.8});
+                scene.add(new THREE.Mesh(fallbackGeo, fallbackMat));
+            });
+
+            function animateGyroid() {
+                requestAnimationFrame(animateGyroid);
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animateGyroid();
+
+            const resizeObserver = new ResizeObserver(() => {
+                if(gyroidContainer.clientWidth > 0 && gyroidContainer.clientHeight > 0) {
+                    camera.aspect = gyroidContainer.clientWidth / gyroidContainer.clientHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(gyroidContainer.clientWidth, gyroidContainer.clientHeight);
+                }
+            });
+            resizeObserver.observe(gyroidContainer);
+        }
+        
+        setTimeout(initGyroid, 500);
+
+    </script>
+
+    <script>
+        // --- Navigation Scroll Highlighting ---
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-links a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= (sectionTop - 250)) {
+                    current = section.getAttribute('id');
+                }
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) { link.classList.add('active'); }
+            });
+        });
+
+        // --- Modal Logic ---
+        const modal = document.getElementById('profileModal');
+        const openBtn = document.getElementById('openModalBtn');
+        const closeBtn = document.getElementById('closeModalBtn');
+        openBtn.addEventListener('click', () => { modal.classList.add('active'); document.body.style.overflow = 'hidden'; });
+        closeBtn.addEventListener('click', () => { modal.classList.remove('active'); document.body.style.overflow = ''; });
+        modal.addEventListener('click', (e) => { if (e.target === modal) { modal.classList.remove('active'); document.body.style.overflow = ''; }});
+
+        // --- Global Methods ---
+        window.toggleAccordion = function(element) {
+            const isActive = element.classList.contains('active');
+            const siblings = element.parentElement.querySelectorAll('.accordion-item');
+            siblings.forEach(sibling => sibling.classList.remove('active'));
+            if (!isActive) { element.classList.add('active'); }
+        }
+
+        window.toggleTimelineRow = function(cardId) {
+            if(event) event.stopPropagation();
+            
+            const item = document.getElementById(cardId);
+            const card = item.querySelector('.timeline-card');
+            
+            card.classList.toggle('active');
+            
+            if (card.classList.contains('active')) {
+                setTimeout(() => { 
+                    const y = item.getBoundingClientRect().top + window.pageYOffset - 100;
+                    window.scrollTo({top: y, behavior: 'smooth'});
+                }, 300);
+            }
+        }
+
+        // --- Scroll Reveal ---
+        const observerOptions = { root: null, rootMargin: '0px', threshold: 0.15 };
+        const scrollObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        document.querySelectorAll('.reveal').forEach(el => scrollObserver.observe(el));
+
+        // --- Global Font Configuration for Chart.js ---
+        Chart.defaults.font.family = '"SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+        // --- Theme Toggle ---
+        const themeBtn = document.getElementById('themeBtn');
+        function updateChartTheme(isDark) {
+            const gridColor = isDark ? '#333333' : '#e5e5ea';
+            const textColor = isDark ? '#86868b' : '#86868b';
+            
+            growthChart.options.scales.x.grid.color = gridColor;
+            growthChart.options.scales.y.grid.color = gridColor;
+            growthChart.options.scales.x.ticks.color = textColor;
+            growthChart.options.scales.y.ticks.color = textColor;
+            growthChart.options.plugins.tooltip.backgroundColor = isDark ? 'rgba(28, 28, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)';
+            growthChart.options.plugins.tooltip.titleColor = isDark ? '#fff' : '#000';
+            growthChart.options.plugins.tooltip.bodyColor = isDark ? '#ddd' : '#333';
+            growthChart.update();
+        }
+
+        themeBtn.addEventListener('click', () => {
+            const body = document.body;
+            if (body.getAttribute('data-theme') === 'dark') { body.removeAttribute('data-theme'); updateChartTheme(false); } 
+            else { body.setAttribute('data-theme', 'dark'); updateChartTheme(true); }
+        });
+
+        // --- Main Filterable Chart.js Init ---
+        const ctx = document.getElementById('growthChart').getContext('2d');
+        const slider = document.getElementById('yearSlider');
+        const yearDisplay = document.getElementById('yearDisplay');
+        const filterBtns = document.querySelectorAll('.chart-filter');
+
+        const masterYears = [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
+        
+        const rawDatasets = [
+            { label: 'Presentation Skills', data: [10, 25, 40, 55, 75, 80, 85, 90, 92, 95, 98, 100], color: '#ff9500', fill: 'rgba(255, 149, 0, 0.1)' },
+            { label: 'Data & Power BI', data: [null, null, null, null, 0, 10, 30, 60, 75, 85, 95, 95], color: '#32d74b', fill: 'rgba(50, 215, 75, 0.05)' },
+            { label: 'Sales & Negotiation', data: [null, null, null, null, 0, 20, 40, 70, 85, 95, 98, 100], color: '#0066cc', fill: 'rgba(0, 102, 204, 0.1)' },
+            { label: '3D & Marketing', data: [null, null, null, null, 0, 15, 40, 60, 85, 95, 100, 100], color: '#bf5af2', fill: 'rgba(191, 90, 242, 0.1)' },
+            { label: 'Leadership', data: [null, null, null, null, null, null, null, null, null, 0, 40, 100], color: '#ff3b30', fill: 'rgba(255, 59, 48, 0.1)' }
+        ];
+
+        function buildChartDatasets(limitIndex) {
+            return rawDatasets.map((ds) => {
+                return {
+                    label: ds.label,
+                    data: ds.data.slice(0, limitIndex + 1),
+                    borderColor: ds.color,
+                    backgroundColor: ds.fill,
+                    borderWidth: 3,
+                    pointRadius: 0, 
+                    pointHoverRadius: 6, 
+                    tension: 0.4,
+                    fill: true,
+                    spanGaps: false
+                }
+            });
+        }
+
+        let growthChart = new Chart(ctx, {
+            type: 'line',
+            data: { labels: masterYears, datasets: buildChartDatasets(11) },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                animation: { duration: 400, easing: 'easeOutQuart' },
+                scales: {
+                    x: { grid: { color: '#e5e5ea' }, ticks: { color: '#86868b', font: { size: 14 } } },
+                    y: { grid: { color: '#e5e5ea' }, ticks: { color: '#86868b' }, min: 0, max: 100 }
+                },
+                plugins: {
+                    legend: { display: false }, 
+                    tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(255, 255, 255, 0.95)', titleColor: '#000', bodyColor: '#333', borderColor: 'rgba(0,0,0,0.1)', borderWidth: 1 }
+                }
+            }
+        });
+
+        // Handle Slider Scrubbing
+        slider.addEventListener('input', (e) => {
+            const currentYear = parseInt(e.target.value);
+            yearDisplay.innerText = currentYear;
+            const index = masterYears.indexOf(currentYear);
+            
+            growthChart.data.labels = masterYears.slice(0, index + 1);
+            const updatedDatasets = buildChartDatasets(index);
+            growthChart.data.datasets.forEach((dataset, i) => { dataset.data = updatedDatasets[i].data; });
+            growthChart.update();
+        });
+
+        // Multi-Select Logic via Ctrl/Cmd key
+        filterBtns.forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+                const datasetIndex = parseInt(btn.getAttribute('data-index'));
+                const isCtrlPressed = e.ctrlKey || e.metaKey;
+
+                if (isCtrlPressed) {
+                    btn.classList.toggle('active');
+                    if (btn.classList.contains('active')) {
+                        growthChart.show(datasetIndex);
+                    } else {
+                        growthChart.hide(datasetIndex);
+                    }
+                } else {
+                    const activeCount = Array.from(filterBtns).filter(b => b.classList.contains('active')).length;
+                    const isActive = btn.classList.contains('active');
+
+                    if (isActive && activeCount === 1) {
+                        filterBtns.forEach((b, i) => { b.classList.add('active'); growthChart.show(i); });
+                    } else {
+                        filterBtns.forEach((b, i) => {
+                            if (i === datasetIndex) {
+                                b.classList.add('active'); growthChart.show(i);
+                            } else {
+                                b.classList.remove('active'); growthChart.hide(i);
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
