@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suraj Kumar | Portfolio</title>
+    
+    <link rel="icon" href="assets/profile.png" type="image/png">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -153,9 +156,11 @@
         .reveal.active { opacity: 1; transform: translateY(0); }
 
         /* Hero */
-        .hero { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 90vh; padding-top: 80px; }
+        .hero { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 90vh; padding-top: 80px; padding-bottom: 0; }
         .hero .t-headline { margin-top: 10px; margin-bottom: 30px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 80px; border-top: 1px solid var(--border); padding-top: 60px; width: 100%; }
+
+        /* Stats Grid (Moved under history) */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin: 40px auto 100px auto; padding-top: 60px; width: 100%; max-width: 1000px; border-top: 1px solid var(--border);}
         .stat-item { text-align: center; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .stat-item:hover { transform: translateY(-10px) scale(1.02); }
         .stat-num { font-size: 48px; font-weight: 600; color: var(--text-title); letter-spacing: -0.003em; }
@@ -201,9 +206,13 @@
         [data-theme="dark"] .timeline-card:hover { box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
         .timeline-card.active { border-color: var(--accent); }
 
+        /* Timeline Header layout for Logos */
+        .timeline-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 16px; }
+        .timeline-card-header .logo { height: 44px; max-width: 120px; object-fit: contain; border-radius: 6px; }
+
         .timeline-year { font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; display: block; }
-        .timeline-card h3 { font-size: 28px; color: var(--text-title); margin-bottom: 6px; }
-        .timeline-company { font-size: 18px; font-weight: 600; color: var(--text-body); margin-bottom: 16px; }
+        .timeline-card h3 { font-size: 26px; color: var(--text-title); margin-bottom: 4px; }
+        .timeline-company { font-size: 17px; font-weight: 600; color: var(--text-body); }
         .timeline-card p.summary { color: var(--text-body); font-size: 17px; line-height: 1.5; margin: 0; }
 
         /* Detail Toggle Button */
@@ -280,10 +289,21 @@
         .accordion-item.active .accordion-header i { transform: rotate(180deg); color: var(--accent); }
         .accordion-item.active .accordion-content { max-height: 200px; opacity: 1; margin-top: 12px; }
 
-        /* 3D Comb Section */
-        .comb-container { display: grid; grid-template-columns: 1fr 350px; gap: 40px; margin-top: 60px; background: var(--card-bg); border-radius: 32px; padding: 40px; box-shadow: var(--shadow); border: 1px solid var(--border); min-height: 500px; max-width: 1060px; margin-left: auto; margin-right: auto;}
+        /* Professional 3D Expertise Axis Section */
+        .comb-container { display: grid; grid-template-columns: 1fr 350px; gap: 40px; margin-top: 60px; background: var(--card-bg); border-radius: 32px; padding: 40px; box-shadow: var(--shadow); border: 1px solid var(--border); min-height: 500px; max-width: 1060px; margin-left: auto; margin-right: auto; position: relative;}
         #canvas-container { width: 100%; height: 450px; background: var(--page-bg); border-radius: 20px; position: relative; overflow: hidden; border: 1px solid var(--border); cursor: grab; }
         #canvas-container:active { cursor: grabbing; }
+        
+        /* Interactive Overlay Instructions */
+        .canvas-overlay {
+            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
+            background: var(--nav-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+            color: var(--text-title); border: 1px solid var(--border);
+            pointer-events: none; z-index: 10; display: flex; align-items: center; gap: 8px; white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-transform: uppercase; letter-spacing: 0.05em;
+        }
+
         .comb-sidebar { display: flex; flex-direction: column; justify-content: center; }
         .comb-sidebar h3 { margin: 0; transition: color 0.3s; font-size: 24px;}
         .comb-sidebar p { font-size: 16px; color: var(--text-body); line-height: 1.5; margin-bottom: 30px; }
@@ -363,6 +383,7 @@
             .timeline-item.left, .timeline-item.right { padding-left: 60px; }
             .timeline-card { padding: 30px 20px; }
             .g-card { min-width: 280px; width: 280px; padding: 24px; }
+            .timeline-card-header { flex-direction: column-reverse; gap: 10px; }
         }
     </style>
 </head>
@@ -378,8 +399,7 @@
             
             <div class="modal-section-title">Personal Details</div>
             <div class="details-grid">
-                <div class="detail-item"><p class="label">Age</p><p class="value">27 Years</p></div>
-                <div class="detail-item"><p class="label">Location</p><p class="value">Chennai, India</p></div>
+                <div class="detail-item full-width"><p class="label">Location</p><p class="value">Chennai, India</p></div>
                 <div class="detail-item full-width"><p class="label">Address</p><p class="value">No 12 Thiruvalluvar Street, Royapettah, Chennai - 600014</p></div>
             </div>
 
@@ -396,6 +416,14 @@
                 <div class="lang-row">
                     <div class="lang-info"><span class="lang-name">Tamil</span><span class="lang-level">Advanced Proficiency</span></div>
                     <div class="lang-tags"><span>Read</span><span>Write</span><span>Speak</span></div>
+                </div>
+                <div class="lang-row">
+                    <div class="lang-info"><span class="lang-name">French & Italian</span><span class="lang-level">Elementary / Learning</span></div>
+                    <div class="lang-tags"><span>Read Basics</span><span>Speak Basics</span></div>
+                </div>
+                <div class="lang-row">
+                    <div class="lang-info"><span class="lang-name">Telugu</span><span class="lang-level">Basic Comprehension</span></div>
+                    <div class="lang-tags"><span>Understand Basics</span><span>Minimal Speaking</span></div>
                 </div>
             </div>
 
@@ -417,7 +445,7 @@
 
             <div class="modal-section-title">Interests & Hobbies</div>
             <div class="lang-tags" style="margin-bottom: 20px;">
-                <span>Science Fiction Literature and Movies</span>
+                <span>Science Fiction Literature & Movies</span>
                 <span>3D Modelling</span>
                 <span>Presentations</span>
                 <span>Cricket</span>
@@ -450,40 +478,28 @@
         <span class="t-eyebrow reveal">Star Performer 2022</span>
         <h1 class="t-headline reveal" style="transition-delay: 0.1s;">Suraj Kumar.</h1>
         <p class="t-intro reveal" style="transition-delay: 0.2s;">A tech-savvy, curious learner driven by a thirst for knowledge. Dedicated to maximizing job satisfaction and personal development through a tireless work ethic and exploring the cutting-edge of technology.</p>
-        
-        <div class="stats-grid reveal" style="transition-delay: 0.3s;">
-            <div class="stat-item">
-                <div class="stat-num">+€610K</div>
-                <div class="stat-label">Sales Revenue YTD</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-num">95.1%</div>
-                <div class="stat-label">B.Tech Ceramic Technology</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-num">+400%</div>
-                <div class="stat-label">Social Growth</div>
-            </div>
-        </div>
     </section>
 
-    <section id="timeline" class="section">
+    <section id="timeline" class="section" style="padding-top: 40px;">
         <div class="text-center reveal">
             <h2 class="t-title-1">Professional History.</h2>
-            <p class="t-intro" style="margin-top: 15px;">Explore how I master the fundamentals before application.</p>
+            <p class="t-intro" style="margin-top: 15px;">Explore how I master the <i style="color: var(--accent); font-style: italic;">fundamentals</i> before <i style="color: var(--accent); font-style: italic;">application</i>.</p>
         </div>
 
         <div class="timeline">
             
             <div class="timeline-item left reveal" id="item1">
                 <div class="timeline-marker"></div>
-                <div class="timeline-card">
-                    <span class="timeline-year">2025 - Present</span>
-                    <h3>Director & Head</h3>
-                    <div class="timeline-company">IRF APAC PVT LTD</div>
+                <div class="timeline-card active">
+                    <div class="timeline-card-header">
+                        <div>
+                            <span class="timeline-year">2025 - Present</span>
+                            <h3>Director & Head</h3>
+                            <div class="timeline-company">IRF APAC PVT LTD</div>
+                        </div>
+                        <img src="assets/irflogo.png" alt="IRF Logo" class="logo">
+                    </div>
                     <p class="summary">Spearheaded the establishment of IRF APAC from the ground up, transforming it into a revenue-generating entity poised to disrupt a monopolistic market in hot repair services.</p>
-                    
-                    <button type="button" class="explore-hint" onclick="window.toggleTimelineRow('item1')">Explore Details <i class="fas fa-chevron-down"></i></button>
                     
                     <div class="gallery-wrapper" onclick="event.stopPropagation()">
                         <div class="gallery-inner">
@@ -513,9 +529,14 @@
             <div class="timeline-item right reveal" id="item2">
                 <div class="timeline-marker"></div>
                 <div class="timeline-card">
-                    <span class="timeline-year">2024 - 2025</span>
-                    <h3>Freelance Consultant</h3>
-                    <div class="timeline-company">IRF</div>
+                    <div class="timeline-card-header">
+                        <div>
+                            <span class="timeline-year">2024 - 2025</span>
+                            <h3>Technical Consultant</h3>
+                            <div class="timeline-company">IRF</div>
+                        </div>
+                        <img src="assets/irflogo.png" alt="IRF Logo" class="logo">
+                    </div>
                     <p class="summary">Recruited to lay the groundwork for establishing IRF in India, handling core administrative research while developing automation solutions for technical services.</p>
                     
                     <button type="button" class="explore-hint" onclick="window.toggleTimelineRow('item2')">Explore Details <i class="fas fa-chevron-down"></i></button>
@@ -548,9 +569,14 @@
             <div class="timeline-item left reveal" id="item3">
                 <div class="timeline-marker"></div>
                 <div class="timeline-card">
-                    <span class="timeline-year">2019 - 2024</span>
-                    <h3>Sales & Marketing Exec</h3>
-                    <div class="timeline-company">Saint-Gobain | SEFPRO Care</div>
+                    <div class="timeline-card-header">
+                        <div>
+                            <span class="timeline-year">2019 - 2024</span>
+                            <h3>Sales & Marketing Exec</h3>
+                            <div class="timeline-company">Saint-Gobain | SEFPRO Care</div>
+                        </div>
+                        <img src="assets/sclogo.png" alt="Saint Gobain Logo" class="logo">
+                    </div>
                     <p class="summary">Joined as a GET and rose to lead the SEFPRO Care division. Scaled revenue from €20K to €600K+ through on-site cold repair execution, global client management, and viral 3D marketing campaigns.</p>
                     
                     <button type="button" class="explore-hint" onclick="window.toggleTimelineRow('item3')">Explore Details <i class="fas fa-chevron-down"></i></button>
@@ -593,9 +619,14 @@
             <div class="timeline-item right reveal" id="item4">
                 <div class="timeline-marker"></div>
                 <div class="timeline-card">
-                    <span class="timeline-year">2018 - 2019</span>
-                    <h3>Eng. Design Intern & Project</h3>
-                    <div class="timeline-company">IIT MADRAS</div>
+                    <div class="timeline-card-header">
+                        <div>
+                            <span class="timeline-year">2018 - 2019</span>
+                            <h3>Engg. Design Intern & Project</h3>
+                            <div class="timeline-company">IIT MADRAS</div>
+                        </div>
+                        <img src="assets/iitmlogo.png" alt="IIT Madras Logo" class="logo">
+                    </div>
                     <p class="summary">Developed topology-optimized, TPMS-based lattice structure designs for bone implant applications using CAD. Validated using ANSYS FEA software.</p>
                     
                     <button type="button" class="explore-hint" onclick="window.toggleTimelineRow('item4')">Explore Details <i class="fas fa-chevron-down"></i></button>
@@ -637,9 +668,14 @@
             <div class="timeline-item left reveal" id="item5">
                 <div class="timeline-marker"></div>
                 <div class="timeline-card">
-                    <span class="timeline-year">2017 - 2018</span>
-                    <h3>CTDT Funded Researcher</h3>
-                    <div class="timeline-company">Center of Tech Development & Transfer</div>
+                    <div class="timeline-card-header">
+                        <div>
+                            <span class="timeline-year">2017 - 2018</span>
+                            <h3>CTDT Funded Researcher</h3>
+                            <div class="timeline-company">Center of Tech Development & Transfer</div>
+                        </div>
+                        <img src="assets/aulogo.png" alt="Anna University Logo" class="logo">
+                    </div>
                     <p class="summary">Secured a ₹25,000 project fund to engineer a high-performance supercapacitor by doping electrodes with barium titanate via spin coating.</p>
                     
                     <button type="button" class="explore-hint" onclick="window.toggleTimelineRow('item5')">Explore Details <i class="fas fa-chevron-down"></i></button>
@@ -677,9 +713,14 @@
             <div class="timeline-item right reveal" id="item6">
                 <div class="timeline-marker"></div>
                 <div class="timeline-card">
-                    <span class="timeline-year">2017</span>
-                    <h3>In-plant Project Trainee</h3>
-                    <div class="timeline-company">CUMI Abrasives</div>
+                    <div class="timeline-card-header">
+                        <div>
+                            <span class="timeline-year">2017</span>
+                            <h3>In-plant Project Trainee</h3>
+                            <div class="timeline-company">CUMI Abrasives</div>
+                        </div>
+                        <img src="assets/cumilogo.png" alt="CUMI Logo" class="logo">
+                    </div>
                     <p class="summary">A Study on Increasing the Hardness of Vitrified Bond by some Additives to enhance the durability and strength of vitrified abrasive wheels.</p>
                     
                     <button type="button" class="explore-hint" onclick="window.toggleTimelineRow('item6')">Explore Details <i class="fas fa-chevron-down"></i></button>
@@ -712,6 +753,21 @@
         </div>
     </section>
 
+    <div class="stats-grid reveal" style="margin: 40px auto 100px auto; padding-top: 0; border-top: none;">
+        <div class="stat-item">
+            <div class="stat-num">+€610K</div>
+            <div class="stat-label">Sales Revenue YTD</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num">95.1%</div>
+            <div class="stat-label">B.Tech Ceramic Technology</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num">+400%</div>
+            <div class="stat-label">Social Growth</div>
+        </div>
+    </div>
+
     <section id="triad" class="section">
         <div class="text-center reveal">
             <h2 class="t-title-1">The Triad.</h2>
@@ -723,7 +779,7 @@
                 <h3>Engineer</h3>
                 <div class="accordion-item" onclick="window.toggleAccordion(this)">
                     <div class="accordion-header"><h4>Ceramic Tech (Anna Univ)</h4><i class="fas fa-chevron-down"></i></div>
-                    <div class="accordion-content"><p>Graduated with 95.1% (2nd Top score). Specialized deeply in material science fundamentals. Study on additives for abrasives, supercapacitors, and Lattice structure design.</p></div>
+                    <div class="accordion-content"><p>Graduated with 95.1% (First Class with Distinction). Specialized deeply in material science fundamentals. Study on additives for abrasives, supercapacitors, and Lattice structure design.</p></div>
                 </div>
                 <div class="accordion-item" onclick="window.toggleAccordion(this)">
                     <div class="accordion-header"><h4>IIT Madras Research Intern</h4><i class="fas fa-chevron-down"></i></div>
@@ -742,7 +798,7 @@
                     <div class="accordion-content"><p>Independently established the company from the ground up and managed all complex regional compliance.</p></div>
                 </div>
                 <div class="accordion-item" onclick="window.toggleAccordion(this)">
-                    <div class="accordion-header"><h4>Freelance Consultant (2024)</h4><i class="fas fa-chevron-down"></i></div>
+                    <div class="accordion-header"><h4>Technical Consultant (2024)</h4><i class="fas fa-chevron-down"></i></div>
                     <div class="accordion-content"><p>Strategic consulting for manufacturing logistics and high-level supply chain optimization.</p></div>
                 </div>
                 <div class="accordion-item" onclick="window.toggleAccordion(this)">
@@ -772,17 +828,23 @@
     <section id="axis" class="section">
         <div class="text-center reveal">
             <h2 class="t-title-1">The Expertise Axis.</h2>
-            <p class="t-intro" style="margin-top: 15px;">The central spine represents foundational engineering, branching into distinct areas of advanced specialization. Click the nodes to view proficiency growth.</p>
+            <p class="t-intro" style="margin-top: 15px;">The central spine represents foundational engineering, branching into distinct areas of advanced specialization.</p>
         </div>
 
         <div class="comb-container reveal">
-            <div id="canvas-container"></div>
+            <div id="canvas-container">
+                <div class="canvas-overlay">
+                    <i class="fas fa-mouse"></i> Drag to Orbit | Scroll to Zoom | Right-Click to Pan
+                </div>
+            </div>
             <div class="comb-sidebar">
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
-                    <h3 id="comb-title" style="margin: 0; transition: color 0.3s;">Select a Node</h3>
+                    <h3 id="comb-title" style="margin: 0; transition: color 0.3s;">Loading Axis...</h3>
                     <span id="comb-prof" style="font-size: 24px; font-weight: 700; color: var(--text-title); transition: opacity 0.3s; opacity: 0;"></span>
                 </div>
-                <p id="comb-desc" style="font-size: 16px; color: var(--text-body); line-height: 1.5; margin-bottom: 30px;">Interact with the 3D models floating around the central axis to view detailed metrics for each vertical.</p>
+                <p id="comb-desc" style="font-size: 16px; color: var(--text-body); line-height: 1.5; margin-bottom: 30px;">
+                    Interact with the 3D models floating around the central axis to view detailed metrics for each vertical.
+                </p>
                 <div class="mini-chart-wrapper">
                     <canvas id="miniChart"></canvas>
                 </div>
@@ -797,10 +859,11 @@
         <div class="chart-wrapper reveal">
             <div class="chart-filters" id="chartFilters">
                 <button class="chart-filter active" data-index="0" style="--dot-color: #ff9500;">Presentation Skills</button>
-                <button class="chart-filter active" data-index="1" style="--dot-color: #32d74b;">Data & Power BI</button>
+                <button class="chart-filter active" data-index="1" style="--dot-color: #32d74b;">Data Engineering</button>
                 <button class="chart-filter active" data-index="2" style="--dot-color: #0066cc;">Sales & Negotiation</button>
-                <button class="chart-filter active" data-index="3" style="--dot-color: #bf5af2;">3D & Marketing</button>
-                <button class="chart-filter active" data-index="4" style="--dot-color: #ff3b30;">Leadership</button>
+                <button class="chart-filter active" data-index="3" style="--dot-color: #bf5af2;">3D & Simulations</button>
+                <button class="chart-filter active" data-index="4" style="--dot-color: #ff3b30;">Marketing</button>
+                <button class="chart-filter active" data-index="5" style="--dot-color: #5E5CE6;">Leadership</button>
             </div>
 
             <div class="chart-container">
@@ -831,8 +894,8 @@
             </a>
             <a href="assets/inote3d.html" target="_blank" class="app-card">
                 <div class="app-icon-wrapper" style="color: #32d74b;"><i class="fas fa-cube"></i></div>
-                <h3>iNote 3D</h3>
-                <p>An aesthetic, spatial note-making engine leveraging three-dimensional organization.</p>
+                <h3>iNote 3D Pro</h3>
+                <p>An aesthetic, spatial note-making engine leveraging three-dimensional organization and GLB imports.</p>
             </a>
             <a href="assets/izoompro.html" target="_blank" class="app-card">
                 <div class="app-icon-wrapper" style="color: #0066cc;"><i class="fas fa-expand-arrows-alt"></i></div>
@@ -914,7 +977,7 @@
             // Infinite Spine
             const spineMat = new THREE.MeshStandardMaterial({ color: 0x86868b, roughness: 0.3, metalness: 0.8 });
             const branchMat = new THREE.MeshStandardMaterial({ color: 0xd2d2d7, roughness: 0.5 });
-            const spineGeo = new THREE.CylinderGeometry(0.15, 0.15, 1000, 32); 
+            const spineGeo = new THREE.CylinderGeometry(0.8, 0.8, 1000, 32); 
             const spine = new THREE.Mesh(spineGeo, spineMat);
             combScene.add(spine);
 
@@ -922,26 +985,29 @@
 
             // Reordered: Bottom (index 0) to Top (index 8)
             const verticalsData = [
-                { file: 'salesforce', title: "Salesforce CRM", desc: "Managing global customer relationships, sales pipelines, and regional business operations.", color: 0x00c7b7, shape: 'cone', chartData: [0, 0, 0, 10, 30, 50, 80, 85] },
-                { file: 'spaceclaim', title: "SpaceClaim CAD", desc: "Direct modeling for rapid 3D geometry manipulation and simulation preparation.", color: 0xff9500, shape: 'box', chartData: [0, 10, 30, 50, 60, 75, 85, 95] },
-                { file: 'ansys', title: "Ansys FEA", desc: "Rigorous thermal and structural finite element analysis for mechanical and material validation.", color: 0xff3b30, shape: 'sphere', chartData: [0, 0, 15, 40, 70, 80, 85, 90] },
-                { file: 'fusion360', title: "Autodesk Fusion 360", desc: "Advanced CAD, CAM, and CAE for product design and engineering simulations.", color: 0x0066cc, shape: 'torus', chartData: [10, 25, 45, 60, 75, 80, 85, 90] },
-                { file: 'unreal', title: "Unreal Engine", desc: "Building advanced visual models and high-fidelity interactive environments.", color: 0x00c7b7, shape: 'box', chartData: [0, 0, 10, 30, 50, 60, 70, 80] },
-                { file: 'powerbi', title: "Power BI", desc: "Developing comprehensive dashboards and business intelligence reporting for C-level executives.", color: 0xffcc00, shape: 'box', chartData: [0, 0, 5, 20, 45, 60, 70, 80] },
-                { file: 'excel', title: "Data & Excel", desc: "Advanced data analysis, inventory optimization, and supply chain modeling.", color: 0x32d74b, shape: 'cone', chartData: [20, 30, 40, 50, 70, 80, 85, 90] },
-                { file: 'blender', title: "Blender 3D", desc: "Expertise in procedural modeling, texturing, and physics-based product animation.", color: 0xbf5af2, shape: 'sphere', chartData: [10, 15, 30, 50, 75, 85, 90, 95] },
-                { file: 'ppt', title: "Executive Presentations", desc: "Translating complex engineering data into high-stakes, engaging stakeholder visuals in PowerPoint.", color: 0xff9500, shape: 'torus', chartData: [10, 25, 40, 55, 75, 85, 95, 99] }
+                { file: 'salesforce', title: "Salesforce CRM", desc: "Managing global customer relationships, sales pipelines, and regional business operations.", color: 0x5E5CE6, shape: 'cone', chartData: [0, 0, 0, 10, 30, 50, 70, 85] }, 
+                { file: 'spaceclaim', title: "SpaceClaim CAD", desc: "Direct modeling for rapid 3D geometry manipulation and simulation preparation.", color: 0x8E8E93, shape: 'box', chartData: [0, 10, 30, 50, 60, 75, 85, 95] }, 
+                { file: 'ansys', title: "Ansys FEA", desc: "Rigorous thermal and structural finite element analysis for mechanical and material validation.", color: 0xff3b30, shape: 'sphere', chartData: [0, 0, 15, 40, 70, 80, 85, 90] }, 
+                { file: 'fusion360', title: "Autodesk Fusion 360", desc: "Advanced CAD, CAM, and CAE for product design and engineering simulations.", color: 0x0066cc, shape: 'torus', chartData: [10, 25, 45, 60, 75, 80, 85, 90] }, 
+                { file: 'unreal', title: "Unreal Engine", desc: "Building advanced visual models and high-fidelity interactive environments.", color: 0x00c7b7, shape: 'box', chartData: [0, 0, 10, 30, 50, 60, 70, 80] }, 
+                { file: 'powerbi', title: "Power BI", desc: "Developing comprehensive dashboards and business intelligence reporting for C-level executives.", color: 0xffcc00, shape: 'box', chartData: [0, 0, 5, 20, 45, 60, 70, 80] }, 
+                { file: 'excel', title: "Data & Excel", desc: "Advanced data analysis, inventory optimization, and supply chain modeling.", color: 0x32d74b, shape: 'cone', chartData: [20, 30, 40, 50, 70, 80, 85, 90] }, 
+                { file: 'blender', title: "Blender 3D", desc: "Expertise in procedural modeling, texturing, and physics-based product animation.", color: 0xbf5af2, shape: 'sphere', chartData: [10, 15, 30, 50, 75, 85, 90, 95] }, 
+                { file: 'ppt', title: "Executive Presentations", desc: "Translating complex engineering data into high-stakes, engaging stakeholder visuals in PowerPoint.", color: 0xff9500, shape: 'torus', chartData: [10, 25, 40, 55, 75, 85, 95, 99] } 
             ];
 
             const interactableMeshes = [];
             
             verticalsData.forEach((data, index) => {
                 const angle = (index / verticalsData.length) * Math.PI * 2;
-                // Dynamically calculates Y spacing so all 9 fit beautifully on screen
                 const yPos = (index - (verticalsData.length - 1) / 2) * 1.5; 
                 
-                const branchLen = 3.0;
-                const branchGeo = new THREE.CylinderGeometry(0.03, 0.03, branchLen, 8);
+                const finalProf = data.chartData[data.chartData.length - 1];
+                
+                // Axis Mapping: Branch length is mathematically tied to the specific proficiency percentage
+                const branchLen = (finalProf / 100) * 4.5;
+                
+                const branchGeo = new THREE.CylinderGeometry(0.06, 0.06, branchLen, 8);
                 const branch = new THREE.Mesh(branchGeo, branchMat);
                 branch.position.set(Math.cos(angle) * (branchLen/2), yPos, Math.sin(angle) * (branchLen/2));
                 branch.rotation.z = Math.PI / 2;
@@ -1015,29 +1081,35 @@
                 }
             });
 
+            function selectCombNode(data) {
+                const colorStr = '#' + data.color.toString(16).padStart(6, '0');
+                
+                document.getElementById('comb-title').innerText = data.title;
+                document.getElementById('comb-title').style.color = colorStr;
+                document.getElementById('comb-desc').innerText = data.desc;
+                
+                const profLabel = document.getElementById('comb-prof');
+                profLabel.innerText = data.chartData[data.chartData.length - 1] + '%';
+                profLabel.style.color = colorStr;
+                profLabel.style.opacity = '1';
+                
+                miniChart.data.datasets[0].data = data.chartData;
+                miniChart.data.datasets[0].borderColor = colorStr;
+                miniChart.data.datasets[0].backgroundColor = `rgba(${(data.color >> 16) & 255}, ${(data.color >> 8) & 255}, ${data.color & 255}, 0.2)`;
+                miniChart.update();
+            }
+
             combContainer.addEventListener('click', (e) => {
                 raycaster.setFromCamera(mouse, combCamera);
                 const intersects = raycaster.intersectObjects(interactableMeshes);
-                
-                if (intersects.length > 0) {
-                    const data = intersects[0].object.userData;
-                    const colorStr = '#' + data.color.toString(16).padStart(6, '0');
-                    
-                    document.getElementById('comb-title').innerText = data.title;
-                    document.getElementById('comb-title').style.color = colorStr;
-                    document.getElementById('comb-desc').innerText = data.desc;
-                    
-                    const profLabel = document.getElementById('comb-prof');
-                    profLabel.innerText = data.chartData[data.chartData.length - 1] + '%';
-                    profLabel.style.color = colorStr;
-                    profLabel.style.opacity = '1';
-                    
-                    miniChart.data.datasets[0].data = data.chartData;
-                    miniChart.data.datasets[0].borderColor = colorStr;
-                    miniChart.data.datasets[0].backgroundColor = `rgba(${(data.color >> 16) & 255}, ${(data.color >> 8) & 255}, ${data.color & 255}, 0.2)`;
-                    miniChart.update();
-                }
+                if (intersects.length > 0) { selectCombNode(intersects[0].object.userData); }
             });
+
+            // Default Select Autodesk Fusion 360 on load
+            setTimeout(() => {
+                const defaultNode = interactableMeshes.find(m => m.userData.file === 'fusion360');
+                if(defaultNode) selectCombNode(defaultNode.userData);
+            }, 1000);
 
             function animateComb() {
                 requestAnimationFrame(animateComb);
@@ -1232,10 +1304,11 @@
         
         const rawDatasets = [
             { label: 'Presentation Skills', data: [10, 25, 40, 55, 75, 80, 85, 90, 92, 95, 98, 100], color: '#ff9500', fill: 'rgba(255, 149, 0, 0.1)' },
-            { label: 'Data & Power BI', data: [null, null, null, null, 0, 10, 30, 60, 75, 85, 95, 95], color: '#32d74b', fill: 'rgba(50, 215, 75, 0.05)' },
+            { label: 'Data Engineering', data: [0, 10, 30, 60, 75, 85, 90, 95, 95, 98, 100, 100], color: '#32d74b', fill: 'rgba(50, 215, 75, 0.05)' },
             { label: 'Sales & Negotiation', data: [null, null, null, null, 0, 20, 40, 70, 85, 95, 98, 100], color: '#0066cc', fill: 'rgba(0, 102, 204, 0.1)' },
-            { label: '3D & Marketing', data: [null, null, null, null, 0, 15, 40, 60, 85, 95, 100, 100], color: '#bf5af2', fill: 'rgba(191, 90, 242, 0.1)' },
-            { label: 'Leadership', data: [null, null, null, null, null, null, null, null, null, 0, 40, 100], color: '#ff3b30', fill: 'rgba(255, 59, 48, 0.1)' }
+            { label: '3D & Simulations', data: [null, null, 0, 10, 20, 35, 50, 70, 85, 95, 100, 100], color: '#bf5af2', fill: 'rgba(191, 90, 242, 0.1)' },
+            { label: 'Marketing', data: [null, null, null, null, 0, 10, 30, 60, 80, 95, 95, 100], color: '#ff3b30', fill: 'rgba(255, 59, 48, 0.1)' },
+            { label: 'Leadership', data: [null, null, null, null, null, null, 0, 20, 45, 75, 95, 100], color: '#5E5CE6', fill: 'rgba(94, 92, 230, 0.1)' }
         ];
 
         function buildChartDatasets(limitIndex) {
