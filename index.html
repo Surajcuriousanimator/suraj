@@ -44,7 +44,8 @@
         html, body {
             background-color: var(--page-bg);
             color: var(--text-title);
-            font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            /* Strictly Apple-first fonts. Segoe UI completely removed. */
+            font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
             font-size: 17px;
             line-height: 1.47059;
             font-weight: 400;
@@ -65,6 +66,22 @@
 
         button:active { transform: scale(0.92) !important; transition: transform 0.1s; }
         a { transition: color 0.3s ease; }
+
+        /* Perfected Typography Trick for Custom Red 'j' Dot */
+        .special-j {
+            position: relative;
+            display: inline-block;
+        }
+        .special-j::after {
+            content: '';
+            position: absolute;
+            width: 0.15em;
+            height: 0.15em;
+            background-color: #d30b00;
+            border-radius: 50%;
+            top: 0.06em; /* Moved down to rest perfectly above the stem */
+            left: 0.06em;
+        }
 
         /* Navigation */
         nav {
@@ -289,7 +306,7 @@
         .accordion-item.active .accordion-header i { transform: rotate(180deg); color: var(--accent); }
         .accordion-item.active .accordion-content { max-height: 200px; opacity: 1; margin-top: 12px; }
 
-        /* Professional 3D Expertise Axis Section */
+        /* 3D Comb Section */
         .comb-container { display: grid; grid-template-columns: 1fr 350px; gap: 40px; margin-top: 60px; background: var(--card-bg); border-radius: 32px; padding: 40px; box-shadow: var(--shadow); border: 1px solid var(--border); min-height: 500px; max-width: 1060px; margin-left: auto; margin-right: auto; position: relative;}
         #canvas-container { width: 100%; height: 450px; background: var(--page-bg); border-radius: 20px; position: relative; overflow: hidden; border: 1px solid var(--border); cursor: grab; }
         #canvas-container:active { cursor: grabbing; }
@@ -305,7 +322,6 @@
         }
 
         .comb-sidebar { display: flex; flex-direction: column; justify-content: center; }
-        .comb-sidebar h3 { margin: 0; transition: color 0.3s; font-size: 24px;}
         .comb-sidebar p { font-size: 16px; color: var(--text-body); line-height: 1.5; margin-bottom: 30px; }
         .mini-chart-wrapper { width: 100%; height: 200px; position: relative; }
 
@@ -431,7 +447,7 @@
             <div class="edu-list">
                 <div class="edu-item">
                     <div class="edu-year">2015 – 2019</div>
-                    <div class="edu-content"><h4>Anna University, ACT Campus</h4><p>Bachelor’s Degree in Ceramic Technology (B. Tech) | Chennai, India</p><span class="edu-score">Achieved: 95.1%</span></div>
+                    <div class="edu-content"><h4>Anna University, ACT Campus</h4><p>Bachelor’s Degree in Ceramic Technology (B. Tech) | Chennai, India</p><span class="edu-score">Achieved: 95.1% (First Class with Distinction)</span></div>
                 </div>
                 <div class="edu-item">
                     <div class="edu-year">2014 – 2015</div>
@@ -476,7 +492,7 @@
 
     <section id="home" class="hero section text-center">
         <span class="t-eyebrow reveal">Star Performer 2022</span>
-        <h1 class="t-headline reveal" style="transition-delay: 0.1s;">Suraj Kumar.</h1>
+        <h1 class="t-headline reveal" style="transition-delay: 0.1s;">Sura<span class="special-j">&#567;</span> Kumar.</h1>
         <p class="t-intro reveal" style="transition-delay: 0.2s;">A tech-savvy, curious learner driven by a thirst for knowledge. Dedicated to maximizing job satisfaction and personal development through a tireless work ethic and exploring the cutting-edge of technology.</p>
     </section>
 
@@ -627,7 +643,7 @@
                         </div>
                         <img src="assets/iitmlogo.png" alt="IIT Madras Logo" class="logo">
                     </div>
-                    <p class="summary">Developed topology-optimized, TPMS-based lattice structure designs for bone implant applications using CAD. Validated using ANSYS FEA software.</p>
+                    <p class="summary">Developed topology-optimized, TPMS-based lattice structure designs for bone implant applications using CAD. Validated using ANSYS FEA & CFD software.</p>
                     
                     <button type="button" class="explore-hint" onclick="window.toggleTimelineRow('item4')">Explore Details <i class="fas fa-chevron-down"></i></button>
                     
@@ -646,17 +662,17 @@
                                     <div class="g-card">
                                         <i class="icon fas fa-atom"></i>
                                         <h4>The Fundamentals</h4>
-                                        <p>Additive manufacturing requires tailored mechanical properties to match bone performance. I explored Triply Periodic Minimal Surfaces (TPMS) with zero mean curvature, mapping them to biocompatible Ti-6Al-4V alloy.</p>
+                                        <p>Additive manufacturing requires tailored mechanical properties to match bone performance. Triply Periodic Minimal Surfaces (TPMS) with zero mean curvature were explored and mathematically mapped to the biocompatible Ti-6Al-4V alloy.</p>
                                     </div>
                                     <div class="g-card">
                                         <i class="icon fas fa-cogs"></i>
                                         <h4>The Methodology</h4>
-                                        <p>Structures were mathematically generated using <strong>Autodesk Monolith</strong> and <strong>Fusion 360</strong>. After converting STL to STP, I applied rigid plates, meshing, and boundary conditions for a 1 MPa compression simulation in ANSYS.</p>
+                                        <p>Structures were mathematically generated using <strong>Autodesk Monolith</strong> and <strong>Fusion 360</strong>. After converting STL to STP, rigid plates, meshing, and boundary conditions were applied for a 1 MPa compression simulation in ANSYS.</p>
                                     </div>
                                     <div class="g-card">
                                         <i class="icon fas fa-chart-line"></i>
                                         <h4>Results & Gibson-Ashby</h4>
-                                        <p>I calculated effective elastic moduli via Hooke's Law and located fracture sites using Von-Mises stress. The resulting Gibson-Ashby model proved the scaffolds perfectly mimic real bone, successfully avoiding the stress shielding effect.</p>
+                                        <p>Effective elastic moduli were calculated via Hooke's Law, and critical fracture sites were located using Von-Mises stress. The resulting Gibson-Ashby model proved the scaffolds perfectly mimic real bone, successfully avoiding the stress shielding effect.</p>
                                     </div>
                                 </div>
                             </div>
@@ -691,7 +707,7 @@
                                     <div class="g-card">
                                         <i class="icon fas fa-flask"></i>
                                         <h4>The Fundamentals</h4>
-                                        <p>Explored the future of energy storage. Supercapacitors offer rapid recharge cycles compared to batteries. I investigated how adding high dielectric ceramic materials (like TiO<sub>2</sub>) to activated porous carbon electrodes enhances charge storage capabilities.</p>
+                                        <p>Explored the future of energy storage. Supercapacitors offer rapid recharge cycles compared to batteries. The research investigated how adding high dielectric ceramic materials (like TiO<sub>2</sub>) to activated porous carbon electrodes enhances charge storage capabilities.</p>
                                     </div>
                                     <div class="g-card">
                                         <i class="icon fas fa-vial"></i>
@@ -786,8 +802,8 @@
                     <div class="accordion-content"><p>Designed and simulated TPMS lattice structures for bone implants. Validated mechanical properties using Ansys FEA.</p></div>
                 </div>
                 <div class="accordion-item" onclick="window.toggleAccordion(this)">
-                    <div class="accordion-header"><h4>Ansys FEA Validation</h4><i class="fas fa-chevron-down"></i></div>
-                    <div class="accordion-content"><p>Conducted rigorous thermal and structural analysis validation for complex geometric models.</p></div>
+                    <div class="accordion-header"><h4>Ansys FEA & CFD</h4><i class="fas fa-chevron-down"></i></div>
+                    <div class="accordion-content"><p>Conducted rigorous thermal, structural, and computational fluid dynamics (CFD) analysis validation for complex geometric models.</p></div>
                 </div>
             </div>
             <div class="bento-card reveal" style="transition-delay: 0.1s;">
@@ -838,10 +854,15 @@
                 </div>
             </div>
             <div class="comb-sidebar">
-                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
-                    <h3 id="comb-title" style="margin: 0; transition: color 0.3s;">Loading Axis...</h3>
-                    <span id="comb-prof" style="font-size: 24px; font-weight: 700; color: var(--text-title); transition: opacity 0.3s; opacity: 0;"></span>
+                
+                <div style="display: flex; flex-direction: column; margin-bottom: 15px; position: relative;">
+                    <img id="comb-logo" src="" alt="Logo" style="width: 64px; height: 64px; object-fit: contain; display: none; margin-bottom: 16px; border-radius: 12px; background: var(--card-bg); padding: 8px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <h3 id="comb-title" style="margin: 0; transition: color 0.3s; font-size: 24px;">Loading Axis...</h3>
+                        <span id="comb-prof" style="font-size: 24px; font-weight: 700; color: var(--text-title); transition: opacity 0.3s; opacity: 0;"></span>
+                    </div>
                 </div>
+                
                 <p id="comb-desc" style="font-size: 16px; color: var(--text-body); line-height: 1.5; margin-bottom: 30px;">
                     Interact with the 3D models floating around the central axis to view detailed metrics for each vertical.
                 </p>
@@ -968,32 +989,52 @@
             combControls.autoRotate = true;
             combControls.autoRotateSpeed = 1.0;
 
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            // Restored clean, standard lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
             combScene.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(10, 20, 10);
-            combScene.add(directionalLight);
+            
+            const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight1.position.set(10, 20, 10);
+            combScene.add(directionalLight1);
+            
+            // Added 3-point light array to eliminate pitch black shadows on metallic surface
+            const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight2.position.set(-10, -20, -10);
+            combScene.add(directionalLight2);
+            
+            const directionalLight3 = new THREE.DirectionalLight(0xffffff, 0.4);
+            directionalLight3.position.set(0, 0, 20);
+            combScene.add(directionalLight3);
 
-            // Infinite Spine
-            const spineMat = new THREE.MeshStandardMaterial({ color: 0x86868b, roughness: 0.3, metalness: 0.8 });
-            const branchMat = new THREE.MeshStandardMaterial({ color: 0xd2d2d7, roughness: 0.5 });
+            // Darker Grey Metallic Spine (Roughness tuned to catch light, metalness for shine without pitch black empty reflections)
+            const spineMat = new THREE.MeshStandardMaterial({ 
+                color: 0x777777, 
+                roughness: 0.25, 
+                metalness: 0.6 
+            });
+            const branchMat = new THREE.MeshStandardMaterial({ 
+                color: 0x999999, 
+                roughness: 0.3, 
+                metalness: 0.5 
+            });
+            
             const spineGeo = new THREE.CylinderGeometry(0.8, 0.8, 1000, 32); 
             const spine = new THREE.Mesh(spineGeo, spineMat);
             combScene.add(spine);
 
             const loader = new GLTFLoader();
 
-            // Reordered: Bottom (index 0) to Top (index 8)
+            // Reordered: Bottom (index 0) to Top (index 8) based on specific percentages
             const verticalsData = [
-                { file: 'salesforce', title: "Salesforce CRM", desc: "Managing global customer relationships, sales pipelines, and regional business operations.", color: 0x5E5CE6, shape: 'cone', chartData: [0, 0, 0, 10, 30, 50, 70, 85] }, 
-                { file: 'spaceclaim', title: "SpaceClaim CAD", desc: "Direct modeling for rapid 3D geometry manipulation and simulation preparation.", color: 0x8E8E93, shape: 'box', chartData: [0, 10, 30, 50, 60, 75, 85, 95] }, 
-                { file: 'ansys', title: "Ansys FEA", desc: "Rigorous thermal and structural finite element analysis for mechanical and material validation.", color: 0xff3b30, shape: 'sphere', chartData: [0, 0, 15, 40, 70, 80, 85, 90] }, 
-                { file: 'fusion360', title: "Autodesk Fusion 360", desc: "Advanced CAD, CAM, and CAE for product design and engineering simulations.", color: 0x0066cc, shape: 'torus', chartData: [10, 25, 45, 60, 75, 80, 85, 90] }, 
-                { file: 'unreal', title: "Unreal Engine", desc: "Building advanced visual models and high-fidelity interactive environments.", color: 0x00c7b7, shape: 'box', chartData: [0, 0, 10, 30, 50, 60, 70, 80] }, 
-                { file: 'powerbi', title: "Power BI", desc: "Developing comprehensive dashboards and business intelligence reporting for C-level executives.", color: 0xffcc00, shape: 'box', chartData: [0, 0, 5, 20, 45, 60, 70, 80] }, 
-                { file: 'excel', title: "Data & Excel", desc: "Advanced data analysis, inventory optimization, and supply chain modeling.", color: 0x32d74b, shape: 'cone', chartData: [20, 30, 40, 50, 70, 80, 85, 90] }, 
-                { file: 'blender', title: "Blender 3D", desc: "Expertise in procedural modeling, texturing, and physics-based product animation.", color: 0xbf5af2, shape: 'sphere', chartData: [10, 15, 30, 50, 75, 85, 90, 95] }, 
-                { file: 'ppt', title: "Executive Presentations", desc: "Translating complex engineering data into high-stakes, engaging stakeholder visuals in PowerPoint.", color: 0xff9500, shape: 'torus', chartData: [10, 25, 40, 55, 75, 85, 95, 99] } 
+                { file: 'salesforce', title: "Salesforce CRM", logo: "saleslogo.png", desc: "Managing global customer relationships, sales pipelines, and regional business operations.", color: 0x5E5CE6, shape: 'cone', chartData: [0, 0, 0, 10, 30, 50, 70, 85] }, 
+                { file: 'spaceclaim', title: "SpaceClaim CAD", logo: "spacelogo.png", desc: "Direct modeling for rapid 3D geometry manipulation and simulation preparation.", color: 0x8E8E93, shape: 'box', chartData: [0, 10, 30, 50, 60, 75, 85, 95] }, 
+                { file: 'ansys', title: "Ansys FEA & CFD", logo: "ansyslogo.png", desc: "Rigorous thermal, structural, and computational fluid dynamics (CFD) analysis for mechanical and material validation.", color: 0xff3b30, shape: 'sphere', chartData: [0, 0, 15, 40, 70, 80, 85, 90] }, 
+                { file: 'fusion360', title: "Autodesk Fusion 360", logo: "autodesklogo.png", desc: "Advanced CAD, CAM, and CAE for product design and engineering simulations.", color: 0x0066cc, shape: 'torus', chartData: [10, 25, 45, 60, 75, 80, 85, 90] }, 
+                { file: 'unreal', title: "Unreal Engine", logo: "unreallogo.png", desc: "Building advanced visual models and high-fidelity interactive environments.", color: 0x00c7b7, shape: 'box', chartData: [0, 0, 10, 30, 50, 60, 70, 80] }, 
+                { file: 'powerbi', title: "Power BI", logo: "powerbilogo.png", desc: "Developing comprehensive dashboards and business intelligence reporting for C-level executives.", color: 0xffcc00, shape: 'box', chartData: [0, 0, 5, 20, 45, 60, 70, 80] }, 
+                { file: 'excel', title: "Data & Excel", logo: "excellogo.png", desc: "Advanced data analysis, inventory optimization, and supply chain modeling.", color: 0x32d74b, shape: 'cone', chartData: [20, 30, 40, 50, 70, 80, 85, 90] }, 
+                { file: 'blender', title: "Blender 3D", logo: "blenderlogo.png", desc: "Expertise in procedural modeling, texturing, and physics-based product animation.", color: 0xbf5af2, shape: 'sphere', chartData: [10, 15, 30, 50, 75, 85, 90, 95] }, 
+                { file: 'ppt', title: "Executive Presentations", logo: "pptlogo.png", desc: "Translating complex engineering data into high-stakes, engaging stakeholder visuals in PowerPoint.", color: 0xff9500, shape: 'torus', chartData: [10, 25, 40, 55, 75, 85, 95, 99] } 
             ];
 
             const interactableMeshes = [];
@@ -1084,15 +1125,28 @@
             function selectCombNode(data) {
                 const colorStr = '#' + data.color.toString(16).padStart(6, '0');
                 
+                // Update text and color
                 document.getElementById('comb-title').innerText = data.title;
                 document.getElementById('comb-title').style.color = colorStr;
                 document.getElementById('comb-desc').innerText = data.desc;
                 
+                // Show Dynamic Logo directly above the title
+                const logoEl = document.getElementById('comb-logo');
+                if(data.logo) {
+                    logoEl.src = `assets/${data.logo}`;
+                    logoEl.style.display = 'block';
+                    logoEl.onerror = () => { logoEl.style.display = 'none'; }; 
+                } else {
+                    logoEl.style.display = 'none';
+                }
+                
+                // Update Percentage display
                 const profLabel = document.getElementById('comb-prof');
                 profLabel.innerText = data.chartData[data.chartData.length - 1] + '%';
                 profLabel.style.color = colorStr;
                 profLabel.style.opacity = '1';
                 
+                // Update Chart
                 miniChart.data.datasets[0].data = data.chartData;
                 miniChart.data.datasets[0].borderColor = colorStr;
                 miniChart.data.datasets[0].backgroundColor = `rgba(${(data.color >> 16) & 255}, ${(data.color >> 8) & 255}, ${data.color & 255}, 0.2)`;
@@ -1269,9 +1323,6 @@
         }, observerOptions);
         document.querySelectorAll('.reveal').forEach(el => scrollObserver.observe(el));
 
-        // --- Global Font Configuration for Chart.js ---
-        Chart.defaults.font.family = '"SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-
         // --- Theme Toggle ---
         const themeBtn = document.getElementById('themeBtn');
         function updateChartTheme(isDark) {
@@ -1282,6 +1333,9 @@
             growthChart.options.scales.y.grid.color = gridColor;
             growthChart.options.scales.x.ticks.color = textColor;
             growthChart.options.scales.y.ticks.color = textColor;
+            
+            growthChart.options.scales.y.title.color = textColor;
+            
             growthChart.options.plugins.tooltip.backgroundColor = isDark ? 'rgba(28, 28, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)';
             growthChart.options.plugins.tooltip.titleColor = isDark ? '#fff' : '#000';
             growthChart.options.plugins.tooltip.bodyColor = isDark ? '#ddd' : '#333';
@@ -1336,7 +1390,13 @@
                 animation: { duration: 400, easing: 'easeOutQuart' },
                 scales: {
                     x: { grid: { color: '#e5e5ea' }, ticks: { color: '#86868b', font: { size: 14 } } },
-                    y: { grid: { color: '#e5e5ea' }, ticks: { color: '#86868b' }, min: 0, max: 100 }
+                    y: { 
+                        grid: { color: '#e5e5ea' }, 
+                        ticks: { color: '#86868b' }, 
+                        min: 0, 
+                        max: 100,
+                        title: { display: true, text: 'Proficiency Level (%)', color: '#86868b', font: { size: 14, weight: '600' } }
+                    }
                 },
                 plugins: {
                     legend: { display: false }, 
