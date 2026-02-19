@@ -152,9 +152,10 @@
         .theme-toggle { 
             background: var(--surface-bg); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; 
             display: flex; align-items: center; justify-content: center; transition: transform 0.3s, background 0.3s; border: 1px solid var(--border); 
+            color: var(--text-title);
         }
         .theme-toggle:hover { transform: scale(1.1); background: var(--border); }
-        .theme-toggle svg { width: 16px; height: 16px; stroke: var(--text-title); fill: none; transition: stroke 0.3s; }
+        .theme-toggle svg { width: 16px; height: 16px; transition: stroke 0.3s; }
         
         /* ==========================================================================
            MODAL - PROFILE OVERVIEW
@@ -174,7 +175,6 @@
         [data-theme="dark"] .profile-card { box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
         .modal-overlay.active .profile-card { transform: scale(1) translateY(0); }
         
-        /* Custom Modal Scrollbar */
         .profile-card::-webkit-scrollbar { width: 8px; }
         .profile-card::-webkit-scrollbar-track { background: transparent; }
         .profile-card::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
@@ -194,21 +194,31 @@
 
         .modal-section-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-body); margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
 
-        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 50px; }
-        .detail-item p.label { font-size: 13px; color: var(--text-body); margin-bottom: 4px; }
-        .detail-item p.value { font-size: 17px; color: var(--text-title); font-weight: 500; }
-        .full-width { grid-column: 1 / -1; }
-
+        /* Premium Language Section (Native Avatars Restored) */
         .lang-list { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 50px; }
         .lang-row { display: flex; justify-content: space-between; align-items: center; background: var(--surface-bg); padding: 18px 24px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.02); transition: transform 0.3s ease, box-shadow 0.3s ease; }
         [data-theme="dark"] .lang-row { border: 1px solid rgba(255,255,255,0.02); }
         .lang-row:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
-        .lang-info { display: flex; flex-direction: column; gap: 4px; }
-        .lang-name { font-weight: 600; font-size: 18px; color: var(--text-title); }
+        
+        .lang-avatar {
+            width: 42px; height: 42px; border-radius: 10px; background: rgba(0, 102, 204, 0.1); color: var(--accent);
+            display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700;
+            border: 1px solid rgba(0, 102, 204, 0.2); font-family: -apple-system, BlinkMacSystemFont, sans-serif; flex-shrink: 0;
+        }
+
+        .lang-info { display: flex; flex-direction: column; gap: 2px; }
+        .lang-name { font-weight: 600; font-size: 17px; color: var(--text-title); line-height: 1.2;}
         .lang-level { font-size: 13px; font-weight: 500; color: var(--text-body); text-transform: uppercase; letter-spacing: 0.02em; }
+        
         .lang-tags { display: flex; gap: 8px; flex-wrap: wrap; }
         .lang-tags span { background: var(--card-bg); color: var(--text-title); font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); cursor: default; }
 
+        /* Hobbies */
+        .hobbies-tags { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 50px;}
+        .hobbies-tags span { background: var(--card-bg); color: var(--text-title); font-size: 14px; font-weight: 500; padding: 10px 18px; border-radius: 24px; border: 1px solid var(--border); box-shadow: 0 2px 6px rgba(0,0,0,0.03); cursor: default; transition: all 0.2s;}
+        .hobbies-tags span:hover { border-color: var(--accent); transform: scale(1.05); }
+
+        /* Education */
         .edu-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 50px; }
         .edu-item { display: grid; grid-template-columns: 100px 1fr; gap: 20px; align-items: start; padding: 15px; border-radius: 20px; transition: all 0.3s ease; margin-left: -15px; margin-right: -15px; }
         .edu-item:hover { background: var(--surface-bg); transform: translateX(5px); }
@@ -216,6 +226,12 @@
         .edu-content h4 { font-size: 18px; color: var(--text-title); margin-bottom: 6px; }
         .edu-content p { font-size: 16px; color: var(--text-body); line-height: 1.5; }
         .edu-score { display: inline-block; margin-top: 8px; font-size: 14px; font-weight: 600; color: #32d74b; background: rgba(50, 215, 75, 0.1); padding: 4px 12px; border-radius: 12px; }
+
+        /* Personal Details */
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .detail-item p.label { font-size: 13px; color: var(--text-body); margin-bottom: 4px; }
+        .detail-item p.value { font-size: 17px; color: var(--text-title); font-weight: 500; }
+        .full-width { grid-column: 1 / -1; }
 
         /* ==========================================================================
            LAYOUT UTILITIES
@@ -234,18 +250,16 @@
             padding-top: 54px; /* Account for nav */
         }
         
-        /* Interactive Connected Particle Canvas (Does not block clicks) */
         #hero-particles { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             z-index: 0; pointer-events: none; filter: blur(2px);
         }
 
-        /* Text Content Wrapper (Centered in remaining space) */
         .hero-content-wrapper {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             flex-grow: 1; width: 100%; z-index: 1; pointer-events: none;
         }
-        .hero-content-wrapper * { pointer-events: auto; } /* Let user click text */
+        .hero-content-wrapper * { pointer-events: auto; } 
 
         .hero-top-badge { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 20px; }
         .hero .t-headline { margin-top: 0; margin-bottom: 30px; }
@@ -254,11 +268,10 @@
         .hero-bottom-anchor {
             width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; 
             padding-bottom: 40px; gap: 20px; z-index: 10; pointer-events: none;
-            margin-top: auto; /* Forces element strictly to the bottom */
+            margin-top: auto; opacity: 0; transform: translateY(20px); transition: opacity 1s ease, transform 1s ease;
         }
         .hero-bottom-anchor * { pointer-events: auto; }
 
-        /* Premium Explore Button */
         .hero-explore-btn {
             background: var(--nav-bg); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
             border: 1px solid var(--border); color: var(--text-title); padding: 12px 28px;
@@ -271,7 +284,7 @@
         .scroll-down-arrow {
             color: var(--text-body); cursor: pointer; transition: color 0.3s;
             animation: bounce 2s infinite; display: flex; align-items: center; justify-content: center;
-            padding: 10px;
+            padding: 10px; font-size: 28px;
         }
         .scroll-down-arrow:hover { color: var(--accent); }
         @keyframes bounce {
@@ -283,19 +296,16 @@
         /* ==========================================================================
            GLOBAL UI COMPONENTS
            ========================================================================== */
-        
-        /* Back to Top Button */
         .back-to-top {
             position: fixed; bottom: 30px; right: 30px; width: 48px; height: 48px;
             border-radius: 50%; background: var(--nav-bg); backdrop-filter: saturate(180%) blur(20px);
             border: 1px solid var(--border); color: var(--text-title); display: flex; align-items: center; justify-content: center; cursor: pointer;
             z-index: 9999; opacity: 0; visibility: hidden; transform: translateY(20px);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: var(--shadow);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: var(--shadow); font-size: 20px;
         }
         .back-to-top.show { opacity: 1; visibility: visible; transform: translateY(0); }
         .back-to-top:hover { transform: translateY(-5px) scale(1.1); background: var(--accent); color: #fff; border-color: var(--accent); }
 
-        /* Stats Grid */
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin: 40px auto 100px auto; padding-top: 60px; width: 100%; max-width: 1000px; border-top: 1px solid var(--border);}
         .stat-item { text-align: center; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .stat-item:hover { transform: translateY(-10px) scale(1.02); }
@@ -320,21 +330,21 @@
         }
         #timeline-airplane.active { opacity: 1; }
         
-        /* The container that rotates based on scroll direction */
+        /* Plane Wrapper for Dynamic Rotation */
         #plane-icon-wrapper {
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform: rotate(135deg); /* Default pointing down */
+            transform: rotate(90deg); /* Downward */
         }
         
-        #plane-icon-wrapper svg {
-            width: 34px; height: 34px; 
-            background: var(--page-bg); border-radius: 50%; padding: 6px; box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            stroke-width: 1.5; transition: background 0.3s;
+        #plane-icon-wrapper i {
+            font-size: 20px; 
+            background: var(--page-bg); border-radius: 50%; padding: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            transition: background 0.3s; display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px;
         }
-        [data-theme="dark"] #plane-icon-wrapper svg { box-shadow: 0 0 15px rgba(255,255,255,0.1); }
+        [data-theme="dark"] #plane-icon-wrapper i { box-shadow: 0 0 15px rgba(255,255,255,0.1); }
         
         #airplane-year {
-            position: absolute; left: 35px; background: var(--accent); color: white;
+            position: absolute; left: 40px; background: var(--accent); color: white;
             padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1); white-space: nowrap; transition: 0.2s;
         }
@@ -370,7 +380,7 @@
         .timeline-card.active { border-color: var(--accent); }
 
         .timeline-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 16px; }
-        .timeline-card-header .logo { height: 44px; max-width: 120px; object-fit: contain; border-radius: 6px; }
+        .timeline-card-header .logo { height: 60px; max-width: 140px; object-fit: contain; border-radius: 6px; }
 
         .timeline-year { font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; display: block; }
         .timeline-card h3 { font-size: 26px; color: var(--text-title); margin-bottom: 4px; }
@@ -385,8 +395,8 @@
         }
         [data-theme="dark"] .explore-hint { border: 1px solid rgba(255,255,255,0.02); }
         .explore-hint:hover { background: var(--border); transform: translateY(-2px); }
-        .explore-hint svg { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); width: 16px; height: 16px; }
-        .timeline-card.active .explore-hint svg { transform: rotate(180deg); }
+        .explore-hint i.fa-chevron-down { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center;}
+        .timeline-card.active .explore-hint i.fa-chevron-down { transform: rotate(180deg); }
 
         .gallery-wrapper {
             display: grid; grid-template-rows: 0fr; opacity: 0;
@@ -397,7 +407,7 @@
         
         .gallery-top-border { border-top: 1px solid var(--border); padding-top: 30px; position: relative; }
         .scroll-hint { font-size: 12px; color: var(--text-body); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; font-weight: 600; }
-        .scroll-hint svg { width: 14px; height: 14px; animation: slideRight 1.5s infinite; }
+        .scroll-hint i { animation: slideRight 1.5s infinite; }
         @keyframes slideRight { 0% { transform: translateX(0); } 50% { transform: translateX(5px); } 100% { transform: translateX(0); } }
 
         .horizontal-scroll {
@@ -424,7 +434,7 @@
         .gallery-img { width: 100%; height: 180px; border-radius: 12px; object-fit: cover; background: var(--card-bg); border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-body); flex-direction: column; gap: 8px;}
 
         /* ==========================================================================
-           THE TRIAD (Restored FontAwesome Icons)
+           THE TRIAD
            ========================================================================== */
         .bento-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 60px; align-items: start; max-width: 1060px; margin-left: auto; margin-right: auto;}
         .bento-card { background: var(--card-bg); border-radius: 32px; padding: 40px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s; }
@@ -437,12 +447,12 @@
         .accordion-item:last-child { border-bottom: none; padding-bottom: 0; }
         .accordion-header { display: flex; justify-content: space-between; align-items: center; transition: color 0.3s; }
         .accordion-header h4 { font-size: 17px; font-weight: 600; color: var(--text-title); transition: color 0.3s; }
-        .accordion-header svg { width: 16px; height: 16px; color: var(--text-body); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s; }
-        .accordion-item:hover .accordion-header h4, .accordion-item:hover .accordion-header svg { color: var(--accent); }
+        .accordion-header i { font-size: 14px; color: var(--text-body); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s; }
+        .accordion-item:hover .accordion-header h4, .accordion-item:hover .accordion-header i { color: var(--accent); }
         .accordion-content { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease; }
         .accordion-content p { font-size: 15px; color: var(--text-body); line-height: 1.5; margin: 0; }
         .accordion-item.active .accordion-header h4 { color: var(--accent); }
-        .accordion-item.active .accordion-header svg { transform: rotate(180deg); color: var(--accent); }
+        .accordion-item.active .accordion-header i { transform: rotate(180deg); color: var(--accent); }
         .accordion-item.active .accordion-content { max-height: 200px; opacity: 1; margin-top: 12px; }
 
         /* ==========================================================================
@@ -489,11 +499,13 @@
         /* ==========================================================================
            FULL WIDTH DYNAMIC 2D LEAFLET MAP
            ========================================================================== */
+        .map-section-header { margin-bottom: 40px; } /* Breathable spacing added */
+        
         #map-section {
             position: relative; width: 100vw; height: 85vh; min-height: 700px;
             margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); 
-            margin-top: 80px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-            z-index: 1;
+            border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+            z-index: 1; margin-top: 0;
         }
         #leaflet-map {
             width: 100%; height: 100%; background: var(--surface-bg);
@@ -506,25 +518,16 @@
             filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
         }
 
-        /* Clean Overlay positioning bottom-left */
-        .map-overlay-text {
-            position: absolute; bottom: 40px; left: 40px; z-index: 1000; 
-            text-align: left;
+        /* Clean Fit to Screen Button (Floating bottom-left inside map) */
+        .simple-fit-btn {
+            position: absolute; bottom: 30px; left: 30px; z-index: 1000;
             background: var(--nav-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            padding: 25px 35px; border-radius: 20px; border: 1px solid var(--border);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            pointer-events: auto; /* Allows clicking the button inside */
+            border: 1px solid var(--border); color: var(--text-title);
+            padding: 10px 20px; border-radius: 30px; font-size: 14px; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: all 0.3s ease;
         }
-        .map-overlay-text h2 { font-size: 36px; color: var(--text-title); margin: 0; letter-spacing: -0.01em;}
-        .map-overlay-text p { font-size: 16px; color: var(--text-body); margin: 8px 0 0 0; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;}
-        
-        .fit-screen-btn {
-            margin-top: 20px; display: inline-flex; align-items: center; gap: 8px;
-            background: var(--surface-bg); color: var(--text-title); border: 1px solid var(--border);
-            padding: 10px 20px; border-radius: 12px; font-weight: 600; font-size: 14px;
-            cursor: pointer; transition: all 0.3s;
-        }
-        .fit-screen-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .simple-fit-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,102,204,0.2); }
 
         /* Custom Map Marker Style (FontAwesome GPS Pin - NO SHADOW) */
         .custom-map-marker {
@@ -535,21 +538,17 @@
             justify-content: center;
             background: none;
             border: none;
+            text-shadow: none; /* Removed Shadow */
         }
 
         /* Map Tooltip Style */
         .custom-map-tooltip {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            color: var(--text-title);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            font-family: "SF Pro Display", -apple-system, sans-serif;
-            padding: 6px 12px;
-            font-size: 14px;
-            font-weight: 600;
+            background: var(--nav-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border); color: var(--text-title);
+            border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 6px 12px; font-size: 14px; font-weight: 600;
         }
-        [data-theme="dark"] .custom-map-tooltip { border-color: var(--border); }
 
         /* Ctrl + Scroll Warning Overlay */
         .map-scroll-overlay {
@@ -561,7 +560,7 @@
         }
 
         /* ==========================================================================
-           APPS PROTOTYPES GRID (Restored FontAwesome)
+           APPS PROTOTYPES GRID
            ========================================================================== */
         .apps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 60px; max-width: 1060px; margin-left: auto; margin-right: auto;}
         .app-card { background: var(--surface-bg); border-radius: 32px; padding: 40px 30px; border: 1px solid rgba(0,0,0,0.03); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s, border-color 0.4s; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 15px; cursor: pointer; text-decoration: none; }
@@ -606,7 +605,7 @@
             .contact-bento { grid-template-columns: 1fr; }
             .big-email { font-size: 36px; }
             
-            /* Mobile Timeline Stacking */
+            /* Mobile Timeline Stacking (No Split) */
             .timeline::before { left: 30px; transform: none; margin-left: -1px; }
             #timeline-airplane { left: 30px; transform: translateX(-50%) translateY(-50%); }
             #airplane-year { left: 25px; } 
@@ -632,8 +631,7 @@
             .chart-filters { flex-direction: column; align-items: stretch; }
             .big-email { font-size: 32px; }
             
-            /* Mobile Map Overlay Adjust */
-            .map-overlay-text { bottom: 20px; left: 20px; right: 20px; width: auto; transform: none; padding: 20px; text-align: center; }
+            .simple-fit-btn { bottom: 15px; left: 15px; }
             
             .timeline::before { left: 20px; }
             #timeline-airplane { left: 20px; }
@@ -650,39 +648,63 @@
 
     <div class="modal-overlay" id="profileModal">
         <div class="profile-card">
-            <button class="close-modal close-modal-btn" aria-label="Close Profile"><i data-lucide="x"></i></button>
+            <button class="close-modal close-modal-btn" aria-label="Close Profile"><i class="fas fa-times"></i></button>
             <div class="modal-header">
                 <img src="assets/profile.png" alt="Suraj Kumar" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23a1a1a6\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'">
                 <div><h2>Suraj Kumar</h2><p>Director & Engineer</p></div>
-            </div>
-            
-            <div class="modal-section-title">Personal Details</div>
-            <div class="details-grid">
-                <div class="detail-item full-width"><p class="label">Location</p><p class="value">Chennai, India</p></div>
-                <div class="detail-item full-width"><p class="label">Address</p><p class="value">No 12 Thiruvalluvar Street, Royapettah, Chennai - 600014</p></div>
             </div>
 
             <div class="modal-section-title">Communication Hub</div>
             <div class="lang-list">
                 <div class="lang-row">
-                    <div class="lang-info"><span class="lang-name">English</span><span class="lang-level">Full Proficiency</span></div>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div class="lang-avatar">En</div>
+                        <div class="lang-info">
+                            <span class="lang-name">English</span>
+                            <span class="lang-level">Full Proficiency</span>
+                        </div>
+                    </div>
                     <div class="lang-tags"><span>Read</span><span>Write</span><span>Speak</span></div>
                 </div>
                 <div class="lang-row">
-                    <div class="lang-info"><span class="lang-name">Hindi</span><span class="lang-level">Full Proficiency</span></div>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div class="lang-avatar">हि</div>
+                        <div class="lang-info">
+                            <span class="lang-name">Hindi</span>
+                            <span class="lang-level">Full Proficiency</span>
+                        </div>
+                    </div>
                     <div class="lang-tags"><span>Read</span><span>Write</span><span>Speak</span></div>
                 </div>
                 <div class="lang-row">
-                    <div class="lang-info"><span class="lang-name">Tamil</span><span class="lang-level">Advanced Proficiency</span></div>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div class="lang-avatar">த</div>
+                        <div class="lang-info">
+                            <span class="lang-name">Tamil</span>
+                            <span class="lang-level">Advanced Proficiency</span>
+                        </div>
+                    </div>
                     <div class="lang-tags"><span>Read</span><span>Write</span><span>Speak</span></div>
                 </div>
                 <div class="lang-row">
-                    <div class="lang-info"><span class="lang-name">French & Italian</span><span class="lang-level">Elementary / Learning</span></div>
-                    <div class="lang-tags"><span>Read Basics</span><span>Speak Basics</span></div>
-                </div>
-                <div class="lang-row">
-                    <div class="lang-info"><span class="lang-name">Telugu</span><span class="lang-level">Basic Comprehension</span></div>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div class="lang-avatar">తె</div>
+                        <div class="lang-info">
+                            <span class="lang-name">Telugu</span>
+                            <span class="lang-level">Basic Comprehension</span>
+                        </div>
+                    </div>
                     <div class="lang-tags"><span>Understand Basics</span><span>Minimal Speaking</span></div>
+                </div>
+                <div class="lang-row">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div class="lang-avatar" style="font-size: 14px;">Fr/It</div>
+                        <div class="lang-info">
+                            <span class="lang-name">French & Italian</span>
+                            <span class="lang-level">Elementary / Learning</span>
+                        </div>
+                    </div>
+                    <div class="lang-tags"><span>Read Basics</span><span>Speak Basics</span></div>
                 </div>
             </div>
 
@@ -703,11 +725,17 @@
             </div>
 
             <div class="modal-section-title">Interests & Hobbies</div>
-            <div class="lang-tags" style="margin-bottom: 20px;">
-                <span>Science Fiction Literature & Movies</span>
-                <span>3D Modelling</span>
-                <span>Presentations</span>
-                <span>Cricket</span>
+            <div class="hobbies-tags">
+                <span><i class="fas fa-book-journal-whills" style="color: var(--accent); margin-right: 6px;"></i>Sci-Fi Literature & Movies</span>
+                <span><i class="fas fa-cube" style="color: #bf5af2; margin-right: 6px;"></i>3D Modelling</span>
+                <span><i class="fas fa-laptop-code" style="color: #32d74b; margin-right: 6px;"></i>Presentations</span>
+                <span><i class="fas fa-baseball-ball" style="color: #ff9500; margin-right: 6px;"></i>Cricket</span>
+            </div>
+
+            <div class="modal-section-title">Personal Details</div>
+            <div class="details-grid">
+                <div class="detail-item full-width"><p class="label">Location</p><p class="value">Chennai, India</p></div>
+                <div class="detail-item full-width"><p class="label">Address</p><p class="value">No 12 Thiruvalluvar Street, Royapettah, Chennai - 600014</p></div>
             </div>
         </div>
     </div>
@@ -724,15 +752,15 @@
             <a href="#triad">Triad</a>
             <a href="#skills">Growth</a>
             <a href="#axis">Expertise Axis</a>
-            <a href="#map-section">Footprint</a>
+            <a href="#map">Footprint</a>
             <a href="#apps">Apps</a>
             <a href="#contact">Contact</a>
         </div>
         
         <div class="nav-actions">
             <button class="theme-toggle" id="themeBtn" aria-label="Toggle Theme">
-                <i data-lucide="moon" id="theme-icon-moon"></i>
-                <i data-lucide="sun" id="theme-icon-sun" style="display: none;"></i>
+                <i class="fas fa-moon" id="theme-icon-moon"></i>
+                <i class="fas fa-sun" id="theme-icon-sun" style="display: none;"></i>
             </button>
         </div>
     </nav>
@@ -742,7 +770,7 @@
         
         <div class="hero-content-wrapper">
             <div class="hero-top-badge reveal">
-                <img src="assets/sclogo.png" alt="Saint-Gobain Logo" style="height: 32px; object-fit: contain;">
+                <img src="assets/sclogo.png" alt="Saint-Gobain Logo" style="height: 48px; object-fit: contain;">
                 <span class="t-eyebrow" style="color: var(--accent); margin: 0; padding-top: 4px;">Star Performer 2022</span>
             </div>
             
@@ -751,12 +779,12 @@
             <p class="t-intro typing-cursor" id="typewriter" style="min-height: 105px; max-width: 800px; line-height: 1.5; padding: 0 20px;"></p>
         </div>
 
-        <div class="hero-bottom-anchor reveal" style="transition-delay: 0.8s;">
+        <div class="hero-bottom-anchor" id="explore-btn-wrapper">
             <button class="hero-explore-btn" onclick="document.getElementById('timeline').scrollIntoView({behavior: 'smooth'})">
                 Explore my journey
             </button>
             <div class="scroll-down-arrow" onclick="document.getElementById('timeline').scrollIntoView({behavior: 'smooth'})" aria-label="Scroll Down">
-                <i data-lucide="arrow-down" style="width: 32px; height: 32px; stroke-width: 1.5;"></i>
+                <i class="fas fa-chevron-down" style="font-size: 24px;"></i>
             </div>
         </div>
     </section>
@@ -770,7 +798,7 @@
         <div class="timeline">
             
             <div id="timeline-airplane">
-                <span id="plane-icon-wrapper"><i data-lucide="plane"></i></span>
+                <span id="plane-icon-wrapper"><i class="fas fa-plane"></i></span>
                 <span id="airplane-year">2026</span>
             </div>
             
@@ -795,12 +823,12 @@
                                         <img src="assets/irf_setup.jpg" alt="IRF Setup" class="gallery-img-real" onerror="this.outerHTML='<div class=\'gallery-img\'><i class=\'fas fa-building\' style=\'font-size: 32px; margin-bottom: 10px;\'></i><span>[ assets/irf_setup.jpg ]</span></div>'">
                                     </div>
                                     <div class="g-card">
-                                        <i class="icon fas fa-cogs"></i>
+                                        <i class="fas fa-cogs icon"></i>
                                         <h4>The Foundation</h4>
                                         <p>Independently managed third-party vendors and contractors to establish a fully operational corporate office and strategic warehouse, setting the stage to serve India and Southeast Asian markets.</p>
                                     </div>
                                     <div class="g-card">
-                                        <i class="icon fas fa-rocket"></i>
+                                        <i class="fas fa-rocket icon"></i>
                                         <h4>The Application</h4>
                                         <p>Successfully transitioned the startup into a revenue-generating powerhouse, fully capable of delivering specialized hot repair services to glassmakers and directly challenging existing market monopolies.</p>
                                     </div>
@@ -834,12 +862,12 @@
                                         <img src="assets/supply_chain.jpg" alt="Supply Chain" class="gallery-img-real" onerror="this.outerHTML='<div class=\'gallery-img\'><i class=\'fas fa-network-wired\' style=\'font-size: 32px; margin-bottom: 10px;\'></i><span>[ assets/supply_chain.jpg ]</span></div>'">
                                     </div>
                                     <div class="g-card">
-                                        <i class="icon fas fa-briefcase"></i>
+                                        <i class="fas fa-briefcase icon"></i>
                                         <h4>The Setup</h4>
                                         <p>Offered an exclusive opportunity to establish IRF's presence in India. Dedicated the first year to comprehensive administrative activities, market research, and actively exploring legal options to establish the corporate entity.</p>
                                     </div>
                                     <div class="g-card">
-                                        <i class="icon fas fa-laptop-code"></i>
+                                        <i class="fas fa-laptop-code icon"></i>
                                         <h4>The Automation</h4>
                                         <p>Engineered automated solutions for the company's technical operations. I developed systems for automated endoscopy reports and completely upgraded corporate presentations to align with global standards.</p>
                                     </div>
@@ -858,7 +886,7 @@
                             <h3>Sales & Marketing Exec</h3>
                             <div class="timeline-company">Saint-Gobain | SEFPRO Care</div>
                         </div>
-                        <img src="assets/sclogo.png" alt="Saint Gobain Logo" class="logo">
+                        <img src="assets/sclogo.png" alt="Saint Gobain Logo" class="logo" style="height: 60px; max-width: 140px;">
                     </div>
                     <p class="summary">Joined as a GET and rose to lead the SEFPRO Care division. Scaled revenue from €20K to €600K+ through on-site cold repair execution, global client management, and viral 3D marketing campaigns.</p>
                     
@@ -873,22 +901,22 @@
                                         <img src="assets/3d_animation.jpg" alt="3D Animation" class="gallery-img-real" onerror="this.outerHTML='<div class=\'gallery-img\'><i class=\'fas fa-cube\' style=\'font-size: 32px; margin-bottom: 10px;\'></i><span>[ assets/3d_animation.jpg ]</span></div>'">
                                     </div>
                                     <div class="g-card">
-                                        <i class="icon fas fa-graduation-cap"></i>
+                                        <i class="fas fa-graduation-cap icon"></i>
                                         <h4>The Beginning</h4>
                                         <p>Started as a Graduate Engineer Trainee, dedicating my first year to intense data analysis and market study to master glass furnace operations. The following year, I was entrusted with the SEFPRO Care division.</p>
                                     </div>
                                     <div class="g-card">
-                                        <i class="icon fas fa-hard-hat"></i>
+                                        <i class="fas fa-hard-hat icon"></i>
                                         <h4>On-Site Execution</h4>
                                         <p>Volunteered to personally execute cold repairs on-site. Successfully managed a massive, resource-constrained repair in Kadapa independently for a month (the furnace is still running perfectly), alongside time-bound fast-paced repairs in Gujarat.</p>
                                     </div>
                                     <div class="g-card">
-                                        <i class="icon fas fa-bullhorn"></i>
+                                        <i class="fas fa-bullhorn icon"></i>
                                         <h4>Digital Marketing & 3D</h4>
                                         <p>Spearheaded digital marketing by creating technical brochures and aesthetic 3D process/product animations. My organic LinkedIn campaigns achieved viral reach with 20,000+ views in weeks, securing me the Star Performer 2022 award.</p>
                                     </div>
                                     <div class="g-card">
-                                        <i class="icon fas fa-globe"></i>
+                                        <i class="fas fa-globe icon"></i>
                                         <h4>Global Reach & Revenue</h4>
                                         <p>Scaled division revenue from €20,000 to €600,000 by year 5. Presented at major national Glass Association conferences, managed global clients, and conducted technical supervision in Malaysia, France, and Poland.</p>
                                     </div>
@@ -926,17 +954,17 @@
                                         <img src="assets/bone.png" alt="Bone Scaffold" class="gallery-img-real" style="object-fit: contain; padding: 10px;" onerror="this.outerHTML='<div class=\'gallery-img\'><i class=\'fas fa-bone\' style=\'font-size: 32px; margin-bottom: 10px;\'></i><span>[ assets/bone.png ]</span></div>'">
                                     </div>
                                     <div class="g-card">
-                                        <i class="icon fas fa-atom"></i>
+                                        <i class="fas fa-atom icon"></i>
                                         <h4>The Fundamentals</h4>
                                         <p>Additive manufacturing requires tailored mechanical properties to match bone performance. Triply Periodic Minimal Surfaces (TPMS) with zero mean curvature were explored and mathematically mapped to the biocompatible Ti-6Al-4V alloy.</p>
                                     </div>
                                     <div class="g-card">
-                                        <i class="icon fas fa-cogs"></i>
+                                        <i class="fas fa-cogs icon"></i>
                                         <h4>The Methodology</h4>
                                         <p>Structures were mathematically generated using <strong>Autodesk Monolith</strong> and <strong>Fusion 360</strong>. After converting STL to STP, rigid plates, meshing, and boundary conditions were applied for a 1 MPa compression simulation in ANSYS.</p>
                                     </div>
                                     <div class="g-card">
-                                        <i class="icon fas fa-chart-line"></i>
+                                        <i class="fas fa-chart-line icon"></i>
                                         <h4>Results & Gibson-Ashby</h4>
                                         <p>Effective elastic moduli were calculated via Hooke's Law, and critical fracture sites were located using Von-Mises stress. The resulting Gibson-Ashby model proved the scaffolds perfectly mimic real bone, successfully avoiding the stress shielding effect.</p>
                                     </div>
@@ -970,17 +998,17 @@
                                         <img src="assets/supercapacitor.jpg" alt="Supercapacitor" class="gallery-img-real" onerror="this.outerHTML='<div class=\'gallery-img\'><i class=\'fas fa-microchip\' style=\'font-size: 32px; margin-bottom: 10px;\'></i><span>[ assets/supercapacitor.jpg ]</span></div>'">
                                     </div>
                                     <div class="g-card">
-                                        <i class="icon fas fa-flask"></i>
+                                        <i class="fas fa-flask icon"></i>
                                         <h4>The Fundamentals</h4>
                                         <p>Explored the future of energy storage. Supercapacitors offer rapid recharge cycles compared to batteries. The research investigated how adding high dielectric ceramic materials (like TiO<sub>2</sub>) to activated porous carbon electrodes enhances charge storage capabilities.</p>
                                     </div>
                                     <div class="g-card">
-                                        <i class="icon fas fa-vial"></i>
+                                        <i class="fas fa-vial icon"></i>
                                         <h4>The Methodology</h4>
                                         <p>Synthesized highly porous activated carbon. Fabricated standard and TiO<sub>2</sub>-doped electrode plates via spin coating, assembling them into supercapacitor casings, and conducted controlled voltage charging and discharge time analysis.</p>
                                     </div>
                                     <div class="g-card">
-                                        <i class="icon fas fa-bolt"></i>
+                                        <i class="fas fa-bolt icon"></i>
                                         <h4>Results & Application</h4>
                                         <p>The TiO<sub>2</sub> doped supercapacitor achieved a remarkable specific capacitance of <strong>26.8 F/g</strong> compared to the standard <strong>19.9 F/g</strong>. This proved the viability of ceramic dopants for vastly improved energy storage capabilities.</p>
                                     </div>
@@ -1014,12 +1042,12 @@
                                         <img src="assets/cumi.jpg" alt="CUMI Abrasives" class="gallery-img-real" onerror="this.outerHTML='<div class=\'gallery-img\'><i class=\'fas fa-industry\' style=\'font-size: 32px; margin-bottom: 10px;\'></i><span>[ assets/cumi.jpg ]</span></div>'">
                                     </div>
                                     <div class="g-card">
-                                        <i class="icon fas fa-vial"></i>
+                                        <i class="fas fa-vial icon"></i>
                                         <h4>The Fundamentals</h4>
                                         <p>Worked on optimizing vitrified abrasive wheels by analyzing the effects of specific additives. The primary objective was to drastically increase the overall hardness, toughness, and tensile strength of the vitrified bond matrix.</p>
                                     </div>
                                     <div class="g-card">
-                                        <i class="icon fas fa-microscope"></i>
+                                        <i class="fas fa-microscope icon"></i>
                                         <h4>Methodology & Results</h4>
                                         <p>One of the tested additives successfully amplified the hardness of the vitrified bond. This was precisely measured using a Vickers Hardness apparatus, and the enhancement in mechanical properties was further verified through rigorous Modulus of Rupture testing.</p>
                                     </div>
@@ -1162,21 +1190,24 @@
         </div>
     </section>
 
-    <section id="map-section" class="reveal">
+    <section id="map" class="section map-section-header text-center" style="padding-bottom: 0;">
+        <div class="reveal">
+            <h2 class="t-title-1">Global Footprint.</h2>
+            <p class="t-intro" style="margin-top: 15px;">Tracking international ventures, projects, and exploration.</p>
+        </div>
+    </section>
+
+    <div id="map-section" class="reveal">
         <div id="leaflet-map">
             <div class="map-scroll-overlay" id="map-scroll-overlay">
                 <span>Use <kbd style="font-family: monospace; background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 6px;">Ctrl</kbd> + Scroll to zoom the map</span>
             </div>
-        </div>
-        
-        <div class="map-overlay-text">
-            <h2>Global Footprint.</h2>
-            <p>Tracking international ventures, projects, and exploration.</p>
-            <button id="fit-map-btn" class="fit-screen-btn">
-                <i class="fas fa-expand-arrows-alt"></i> Fit to Screen
+            
+            <button id="fit-map-btn" class="simple-fit-btn">
+                <i class="fas fa-compress-arrows-alt"></i> Fit to Screen
             </button>
         </div>
-    </section>
+    </div>
 
     <section id="apps" class="section text-center">
         <h2 class="t-title-1 reveal">Live Prototypes.</h2>
@@ -1260,9 +1291,6 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // Init Icons safely
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-
             // Profile Modal Logic
             const modal = document.getElementById('profileModal');
             const openBtns = document.querySelectorAll('.open-modal-btn');
@@ -1328,12 +1356,12 @@
 
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-            // Clean, borderless base map
+            // Clean, borderless Esri base map
             L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
                 maxZoom: 16
             }).addTo(map);
 
-            // Custom Marker Icon (No Shadow, uses Accent Color)
+            // Custom Marker Icon (Restored GPS Pin - No Shadow)
             const customIcon = L.divIcon({
                 className: 'custom-map-marker',
                 html: '<i class="fas fa-map-marker-alt"></i>',
@@ -1342,7 +1370,7 @@
                 tooltipAnchor: [0, -20]
             });
 
-            // Master Array of User Locations with Clean City Names
+            // Master Array of User Locations with Clean City Names for Tooltips
             const locations = [
                 { name: "Venice", lat: 45.5053, lng: 12.3519 },
                 { name: "Warsaw", lat: 52.1657, lng: 20.9671 },
@@ -1376,10 +1404,8 @@
                 { name: "Lyon", lat: 45.7500, lng: 4.8500 },
                 { name: "Opole", lat: 50.6600, lng: 17.9200 },
                 { name: "Roorkee", lat: 29.8543, lng: 77.8880 },
-                { name: "Paisra", lat: 24.1000, lng: 86.3000 },
-                { name: "Manjwara Ghat", lat: 24.1500, lng: 86.3500 },
-                { name: "Vikrampur", lat: 25.2000, lng: 87.0000 },
-                { name: "Amlo", lat: 24.2000, lng: 86.4000 },
+                { name: "Jharkhand", lat: 24.1000, lng: 86.3000 },
+                { name: "Bihar", lat: 25.2000, lng: 87.0000 },
                 { name: "Papparambakkam", lat: 13.1000, lng: 79.9500 },
                 { name: "Sriperumbudur", lat: 12.9700, lng: 79.9400 },
                 { name: "Kutch", lat: 22.8079, lng: 69.5252 }
@@ -1391,7 +1417,7 @@
             locations.forEach(loc => {
                 const marker = L.marker([loc.lat, loc.lng], { icon: customIcon })
                  .addTo(map)
-                 .bindTooltip(loc.name, {
+                 .bindTooltip(`<b style="font-family: 'SF Pro Display', sans-serif; font-size: 14px;">${loc.name}</b>`, {
                      direction: 'top',
                      className: 'custom-map-tooltip'
                  });
@@ -1493,7 +1519,7 @@
                 });
             }
 
-            // 2. Slowed Bulletproof Typewriter
+            // 2. Slowed Bulletproof Typewriter & Button Reveal
             const typeText = "A tech-savvy, curious learner driven by a thirst for knowledge. Dedicated to maximizing job satisfaction and personal development through a tireless work ethic and exploring the cutting-edge of technology.";
             const container = document.getElementById("typewriter");
             if(container) {
@@ -1508,7 +1534,16 @@
                         i++;
                         setTimeout(typeWriter, delay); 
                     } else {
-                        setTimeout(() => { container.classList.remove('typing-cursor'); }, 2500);
+                        setTimeout(() => { 
+                            container.classList.remove('typing-cursor'); 
+                            
+                            // Elegantly reveal the bottom button + arrow after typing is fully done
+                            const exploreBtn = document.getElementById('explore-btn-wrapper');
+                            if(exploreBtn) {
+                                exploreBtn.style.opacity = '1';
+                                exploreBtn.style.transform = 'translateY(0)';
+                            }
+                        }, 500);
                     }
                 }
                 setTimeout(typeWriter, 1400); // Wait for name reveal
@@ -1523,6 +1558,7 @@
             const mouse = { x: -1000, y: -1000, radius: 200 }; 
 
             function initParticles() {
+                // Ensure canvas matches screen bounds
                 pCanvas.style.width = '100vw';
                 pCanvas.style.height = '100%';
                 pCanvas.width = pCanvas.offsetWidth;
@@ -1547,6 +1583,7 @@
 
             window.addEventListener('resize', initParticles);
             
+            // Listen on the window for mouse events
             window.addEventListener('mousemove', (e) => {
                 if (window.scrollY < pH) {
                     const rect = pCanvas.getBoundingClientRect();
@@ -1583,11 +1620,13 @@
                     p.x += p.vx;
                     p.y += p.vy;
 
+                    // Full screen wrap
                     if (p.x < 0) p.x = pW;
                     if (p.x > pW) p.x = 0;
                     if (p.y < 0) p.y = pH;
                     if (p.y > pH) p.y = 0;
 
+                    // Gentle mouse repel
                     let dx = p.x - mouse.x;
                     let dy = p.y - mouse.y;
                     let dist = Math.sqrt(dx * dx + dy * dy);
@@ -1597,12 +1636,14 @@
                         p.y += (dy / dist) * force * 1.5;
                     }
 
+                    // Draw Dots
                     pCtx.beginPath();
                     pCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                     pCtx.fillStyle = `rgba(${rgbAccent}, ${particleAlpha})`;
                     pCtx.fill();
                 });
 
+                // Draw Connections
                 for (let i = 0; i < particles.length; i++) {
                     for (let j = i + 1; j < particles.length; j++) {
                         let dx = particles[i].x - particles[j].x;
@@ -1675,9 +1716,9 @@
                     const isScrollingUp = currentScrollY < lastScrollY;
                     lastScrollY = currentScrollY;
 
-                    // Plane direction
-                    if (isScrollingUp) planeWrapper.style.transform = 'rotate(-45deg)'; 
-                    else planeWrapper.style.transform = 'rotate(135deg)'; 
+                    // Plane direction (FontAwesome FA-PLANE naturally points right)
+                    if (isScrollingUp) planeWrapper.style.transform = 'rotate(-90deg)'; // Point Straight Up
+                    else planeWrapper.style.transform = 'rotate(90deg)'; // Point Straight Down
 
                     const tlRect = timelineNode.getBoundingClientRect();
                     const winH = window.innerHeight;
@@ -1693,6 +1734,7 @@
                         let currentYear = parseInt(yearLabel.innerText) || 2026;
                         let foundMatch = false;
 
+                        // Precision override inside a card
                         timelineItems.forEach(card => {
                             const rect = card.getBoundingClientRect();
                             if (scrollCenter >= rect.top - 50 && scrollCenter <= rect.bottom + 50) {
@@ -1702,11 +1744,13 @@
                                 let localProgress = (scrollCenter - rect.top) / rect.height;
                                 localProgress = Math.max(0, Math.min(1, localProgress));
                                 
+                                // Math to tick down the year smoothly
                                 currentYear = startYear - (localProgress * (startYear - endYear));
                                 foundMatch = true;
                             }
                         });
                         
+                        // Strict Boundaries if between cards or outside
                         if (!foundMatch) {
                             if(timelineItems.length > 0) {
                                 const firstCard = timelineItems[0];
@@ -1720,7 +1764,7 @@
                             }
                         }
                         
-                        if(isNaN(currentYear)) currentYear = 2026; 
+                        if(isNaN(currentYear)) currentYear = 2026; // Final Failsafe
                         yearLabel.innerText = Math.round(currentYear);
                     } else {
                         airplane.classList.remove('active');
@@ -1859,13 +1903,13 @@
                     if (body.getAttribute('data-theme') === 'dark') { 
                         body.removeAttribute('data-theme'); 
                         updateChartTheme(false); 
-                        if(moon) moon.style.display = 'block';
+                        if(moon) moon.style.display = 'inline-block';
                         if(sun) sun.style.display = 'none';
                     } else { 
                         body.setAttribute('data-theme', 'dark'); 
                         updateChartTheme(true); 
                         if(moon) moon.style.display = 'none';
-                        if(sun) sun.style.display = 'block';
+                        if(sun) sun.style.display = 'inline-block';
                     }
                 });
             }
@@ -2025,9 +2069,14 @@
                 profLabel.style.opacity = '1';
                 
                 if(window.growthChartAxis) {
+                    const miniCtx = document.getElementById('miniChart').getContext('2d');
+                    let gradient = miniCtx.createLinearGradient(0, 0, 0, 200);
+                    gradient.addColorStop(0, `rgba(${(data.color >> 16) & 255}, ${(data.color >> 8) & 255}, ${data.color & 255}, 0.5)`);
+                    gradient.addColorStop(1, `rgba(${(data.color >> 16) & 255}, ${(data.color >> 8) & 255}, ${data.color & 255}, 0.0)`);
+
                     window.growthChartAxis.data.datasets[0].data = data.chartData;
                     window.growthChartAxis.data.datasets[0].borderColor = colorStr;
-                    window.growthChartAxis.data.datasets[0].backgroundColor = `rgba(${(data.color >> 16) & 255}, ${(data.color >> 8) & 255}, ${data.color & 255}, 0.2)`;
+                    window.growthChartAxis.data.datasets[0].backgroundColor = gradient;
                     window.growthChartAxis.update();
                 }
             }
