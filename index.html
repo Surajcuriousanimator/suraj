@@ -128,7 +128,6 @@
         }
         [data-theme="dark"] nav { border-bottom: 1px solid rgba(255,255,255,0.05); }
         
-        /* Left Nav Brand (Profile + Text) */
         .nav-brand { 
             display: flex; align-items: center; gap: 10px; cursor: pointer; justify-content: flex-start; transition: opacity 0.3s; 
         }
@@ -322,7 +321,7 @@
             top: 0; bottom: 0; left: 50%; transform: translateX(-50%); z-index: 1; 
         }
 
-        /* Timeline Airplane Tracker */
+        /* Timeline Airplane Tracker (FontAwesome Plane Restored) */
         #timeline-airplane {
             position: absolute; left: 50%; top: 0; transform: translateX(-50%) translateY(-50%);
             color: var(--accent); z-index: 10; display: flex; align-items: center; justify-content: center;
@@ -330,16 +329,17 @@
         }
         #timeline-airplane.active { opacity: 1; }
         
-        /* Plane Wrapper for Dynamic Rotation */
+        /* The container that perfectly rotates the plane */
         #plane-icon-wrapper {
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform: rotate(90deg); /* Downward */
+            transform: rotate(135deg); /* Default pointing DOWN */
         }
         
+        /* The icon normalizer (FA plane points top right, so we rotate it -45deg to point straight UP locally first) */
         #plane-icon-wrapper i {
             font-size: 20px; 
             background: var(--page-bg); border-radius: 50%; padding: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            transition: background 0.3s; display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px;
+            transition: background 0.3s; display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px;
         }
         [data-theme="dark"] #plane-icon-wrapper i { box-shadow: 0 0 15px rgba(255,255,255,0.1); }
         
@@ -499,7 +499,7 @@
         /* ==========================================================================
            FULL WIDTH DYNAMIC 2D LEAFLET MAP
            ========================================================================== */
-        .map-section-header { margin-bottom: 40px; } /* Breathable spacing added */
+        .map-section-header { margin-bottom: 40px; } 
         
         #map-section {
             position: relative; width: 100vw; height: 85vh; min-height: 700px;
@@ -527,7 +527,7 @@
             cursor: pointer; display: flex; align-items: center; gap: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: all 0.3s ease;
         }
-        .simple-fit-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,102,204,0.2); }
+        .simple-fit-btn:hover { background: var(--accent); color: white; border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,102,204,0.2); }
 
         /* Custom Map Marker Style (FontAwesome GPS Pin - NO SHADOW) */
         .custom-map-marker {
@@ -538,7 +538,7 @@
             justify-content: center;
             background: none;
             border: none;
-            text-shadow: none; /* Removed Shadow */
+            text-shadow: none; 
         }
 
         /* Map Tooltip Style */
@@ -585,7 +585,6 @@
         .contact-card h3 { font-size: 24px; color: var(--text-title); margin-bottom: 8px; }
         .contact-card p { font-size: 16px; color: var(--text-body); margin-bottom: 24px; line-height: 1.5; }
         
-        /* Force single line email */
         .big-email { font-size: clamp(24px, 4vw, 40px); font-weight: 700; color: var(--text-title); text-decoration: none; line-height: 1.1; letter-spacing: -0.02em; transition: color 0.3s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; z-index: 2;}
         .big-email:hover { color: var(--accent); }
         
@@ -759,8 +758,8 @@
         
         <div class="nav-actions">
             <button class="theme-toggle" id="themeBtn" aria-label="Toggle Theme">
-                <i class="fas fa-moon" id="theme-icon-moon"></i>
-                <i class="fas fa-sun" id="theme-icon-sun" style="display: none;"></i>
+                <span id="theme-icon-moon"><i data-lucide="moon"></i></span>
+                <span id="theme-icon-sun" style="display: none;"><i data-lucide="sun"></i></span>
             </button>
         </div>
     </nav>
@@ -798,7 +797,9 @@
         <div class="timeline">
             
             <div id="timeline-airplane">
-                <span id="plane-icon-wrapper"><i class="fas fa-plane"></i></span>
+                <span id="plane-icon-wrapper">
+                    <i class="fas fa-plane" style="transform: rotate(-90deg);"></i>
+                </span>
                 <span id="airplane-year">2026</span>
             </div>
             
@@ -806,7 +807,7 @@
                 <div class="timeline-card active" data-start-year="2026" data-end-year="2025">
                     <div class="timeline-card-header">
                         <div>
-                            <span class="timeline-year">2026 - 2025</span>
+                            <span class="timeline-year">Present - 2025</span>
                             <h3>Director & Head</h3>
                             <div class="timeline-company">IRF APAC PVT LTD</div>
                         </div>
@@ -1291,6 +1292,9 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            // Safe Lucide initialization for Light/Dark mode wrappers
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
             // Profile Modal Logic
             const modal = document.getElementById('profileModal');
             const openBtns = document.querySelectorAll('.open-modal-btn');
@@ -1317,7 +1321,6 @@
             }
         });
 
-        // Global Methods for Inline HTML Calls
         window.toggleAccordion = function(element) {
             const isActive = element.classList.contains('active');
             const siblings = element.parentElement.querySelectorAll('.accordion-item');
@@ -1345,23 +1348,20 @@
             const mapEl = document.getElementById('leaflet-map');
             if (!mapEl) return;
 
-            // Initialize map centered roughly on India/Middle East
             const map = L.map('leaflet-map', {
                 center: [20, 60],
                 zoom: 3,
                 zoomControl: false,
-                scrollWheelZoom: false, // Start disabled to protect page scroll
-                attributionControl: false // Removes bottom right text/borders
+                scrollWheelZoom: false,
+                attributionControl: false 
             });
 
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-            // Clean, borderless Esri base map
             L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
                 maxZoom: 16
             }).addTo(map);
 
-            // Custom Marker Icon (Restored GPS Pin - No Shadow)
             const customIcon = L.divIcon({
                 className: 'custom-map-marker',
                 html: '<i class="fas fa-map-marker-alt"></i>',
@@ -1370,7 +1370,6 @@
                 tooltipAnchor: [0, -20]
             });
 
-            // Master Array of User Locations with Clean City Names for Tooltips
             const locations = [
                 { name: "Venice", lat: 45.5053, lng: 12.3519 },
                 { name: "Warsaw", lat: 52.1657, lng: 20.9671 },
@@ -1395,7 +1394,6 @@
                 { name: "Kolkata", lat: 22.5851, lng: 88.3468 },
                 { name: "Rishikesh", lat: 30.1250, lng: 78.3240 },
                 { name: "Kuala Lumpur", lat: 3.1578, lng: 101.7115 },
-                { name: "Brescia", lat: 45.5400, lng: 10.2100 },
                 { name: "Pen", lat: 18.7300, lng: 73.0300 },
                 { name: "Erode", lat: 11.2742, lng: 77.5805 },
                 { name: "Palakkad", lat: 10.7800, lng: 76.6500 },
@@ -1413,7 +1411,6 @@
 
             const markerObjects = [];
 
-            // Add all markers to the map with Tooltips
             locations.forEach(loc => {
                 const marker = L.marker([loc.lat, loc.lng], { icon: customIcon })
                  .addTo(map)
@@ -1424,13 +1421,11 @@
                 markerObjects.push([loc.lat, loc.lng]);
             });
 
-            // Fit to screen logic
             const mapBounds = L.latLngBounds(markerObjects);
             document.getElementById('fit-map-btn').addEventListener('click', () => {
                 map.fitBounds(mapBounds, { padding: [50, 50] });
             });
 
-            // Ctrl + Scroll Logic
             const mapOverlay = document.getElementById('map-scroll-overlay');
             let scrollTimeout;
 
@@ -1447,7 +1442,6 @@
                 }
             });
             
-            // Re-disable when mouse leaves
             mapEl.addEventListener('mouseleave', () => {
                 map.scrollWheelZoom.disable();
                 mapOverlay.style.opacity = '0';
@@ -1457,7 +1451,6 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // Scroll Reveal
             const observerOptions = { root: null, rootMargin: '0px', threshold: 0.15 };
             const scrollObserver = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
@@ -1469,7 +1462,6 @@
             }, observerOptions);
             document.querySelectorAll('.reveal').forEach(el => scrollObserver.observe(el));
 
-            // Nav Highlighting & Back to Top
             window.addEventListener('scroll', () => {
                 const backBtn = document.getElementById("backToTop");
                 if (backBtn) {
@@ -1505,7 +1497,6 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // 1. Elegant Blur Name Reveal
             const nameEl = document.getElementById("blur-name");
             if(nameEl) {
                 const nameText = "Suraj Kumar."; 
@@ -1519,7 +1510,6 @@
                 });
             }
 
-            // 2. Slowed Bulletproof Typewriter & Button Reveal
             const typeText = "A tech-savvy, curious learner driven by a thirst for knowledge. Dedicated to maximizing job satisfaction and personal development through a tireless work ethic and exploring the cutting-edge of technology.";
             const container = document.getElementById("typewriter");
             if(container) {
@@ -1528,7 +1518,6 @@
                 function typeWriter() {
                     if (i < typeText.length) {
                         container.innerHTML += typeText.charAt(i);
-                        // Deliberate reading cadence
                         let delay = 45; 
                         if (typeText.charAt(i) === ',' || typeText.charAt(i) === '.') delay = 450; 
                         i++;
@@ -1536,8 +1525,6 @@
                     } else {
                         setTimeout(() => { 
                             container.classList.remove('typing-cursor'); 
-                            
-                            // Elegantly reveal the bottom button + arrow after typing is fully done
                             const exploreBtn = document.getElementById('explore-btn-wrapper');
                             if(exploreBtn) {
                                 exploreBtn.style.opacity = '1';
@@ -1546,10 +1533,9 @@
                         }, 500);
                     }
                 }
-                setTimeout(typeWriter, 1400); // Wait for name reveal
+                setTimeout(typeWriter, 1400);
             }
 
-            // 3. True Full-Width Connective Particles
             const pCanvas = document.getElementById('hero-particles');
             if(!pCanvas) return;
             const pCtx = pCanvas.getContext('2d');
@@ -1558,7 +1544,6 @@
             const mouse = { x: -1000, y: -1000, radius: 200 }; 
 
             function initParticles() {
-                // Ensure canvas matches screen bounds
                 pCanvas.style.width = '100vw';
                 pCanvas.style.height = '100%';
                 pCanvas.width = pCanvas.offsetWidth;
@@ -1574,7 +1559,7 @@
                     particles.push({
                         x: Math.random() * pW,
                         y: Math.random() * pH,
-                        vx: (Math.random() - 0.5) * 0.2, // Ultra Slow
+                        vx: (Math.random() - 0.5) * 0.2, 
                         vy: (Math.random() - 0.5) * 0.2, 
                         size: Math.random() * 2 + 1,
                     });
@@ -1583,7 +1568,6 @@
 
             window.addEventListener('resize', initParticles);
             
-            // Listen on the window for mouse events
             window.addEventListener('mousemove', (e) => {
                 if (window.scrollY < pH) {
                     const rect = pCanvas.getBoundingClientRect();
@@ -1612,7 +1596,6 @@
                 const rgbAccent = hexToRgb(rawAccent);
                 const isDark = document.body.getAttribute('data-theme') === 'dark';
                 
-                // Boosted Brightness for Dark Mode
                 const particleAlpha = isDark ? 1.0 : 0.5;
                 const lineBaseAlpha = isDark ? 0.6 : 0.2;
 
@@ -1620,13 +1603,11 @@
                     p.x += p.vx;
                     p.y += p.vy;
 
-                    // Full screen wrap
                     if (p.x < 0) p.x = pW;
                     if (p.x > pW) p.x = 0;
                     if (p.y < 0) p.y = pH;
                     if (p.y > pH) p.y = 0;
 
-                    // Gentle mouse repel
                     let dx = p.x - mouse.x;
                     let dy = p.y - mouse.y;
                     let dist = Math.sqrt(dx * dx + dy * dy);
@@ -1636,14 +1617,12 @@
                         p.y += (dy / dist) * force * 1.5;
                     }
 
-                    // Draw Dots
                     pCtx.beginPath();
                     pCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                     pCtx.fillStyle = `rgba(${rgbAccent}, ${particleAlpha})`;
                     pCtx.fill();
                 });
 
-                // Draw Connections
                 for (let i = 0; i < particles.length; i++) {
                     for (let j = i + 1; j < particles.length; j++) {
                         let dx = particles[i].x - particles[j].x;
@@ -1668,7 +1647,6 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // Impact Counters
             const counters = document.querySelectorAll('.counter');
             if(counters.length > 0) {
                 const countObserver = new IntersectionObserver((entries, observer) => {
@@ -1702,7 +1680,6 @@
                 counters.forEach(c => countObserver.observe(c));
             }
 
-            // Bulletproof Timeline Airplane Tracker
             const airplane = document.getElementById('timeline-airplane');
             const timelineItems = document.querySelectorAll('.timeline-card'); 
             const yearLabel = document.getElementById('airplane-year');
@@ -1716,9 +1693,12 @@
                     const isScrollingUp = currentScrollY < lastScrollY;
                     lastScrollY = currentScrollY;
 
-                    // Plane direction (FontAwesome FA-PLANE naturally points right)
-                    if (isScrollingUp) planeWrapper.style.transform = 'rotate(-90deg)'; // Point Straight Up
-                    else planeWrapper.style.transform = 'rotate(90deg)'; // Point Straight Down
+                    // PERFECTED PLANE DIRECTION
+                    // FontAwesome fa-plane natively points TOP-RIGHT (45deg). 
+                    // To point straight DOWN: 180deg (or 135deg). 180deg works perfectly here.
+                    // To point straight UP: 0deg
+                    if (isScrollingUp) planeWrapper.style.transform = 'rotate(0deg)'; 
+                    else planeWrapper.style.transform = 'rotate(180deg)'; 
 
                     const tlRect = timelineNode.getBoundingClientRect();
                     const winH = window.innerHeight;
@@ -1734,7 +1714,6 @@
                         let currentYear = parseInt(yearLabel.innerText) || 2026;
                         let foundMatch = false;
 
-                        // Precision override inside a card
                         timelineItems.forEach(card => {
                             const rect = card.getBoundingClientRect();
                             if (scrollCenter >= rect.top - 50 && scrollCenter <= rect.bottom + 50) {
@@ -1744,13 +1723,11 @@
                                 let localProgress = (scrollCenter - rect.top) / rect.height;
                                 localProgress = Math.max(0, Math.min(1, localProgress));
                                 
-                                // Math to tick down the year smoothly
                                 currentYear = startYear - (localProgress * (startYear - endYear));
                                 foundMatch = true;
                             }
                         });
                         
-                        // Strict Boundaries if between cards or outside
                         if (!foundMatch) {
                             if(timelineItems.length > 0) {
                                 const firstCard = timelineItems[0];
@@ -1764,7 +1741,7 @@
                             }
                         }
                         
-                        if(isNaN(currentYear)) currentYear = 2026; // Final Failsafe
+                        if(isNaN(currentYear)) currentYear = 2026; 
                         yearLabel.innerText = Math.round(currentYear);
                     } else {
                         airplane.classList.remove('active');
@@ -1903,13 +1880,13 @@
                     if (body.getAttribute('data-theme') === 'dark') { 
                         body.removeAttribute('data-theme'); 
                         updateChartTheme(false); 
-                        if(moon) moon.style.display = 'inline-block';
+                        if(moon) moon.style.display = 'block';
                         if(sun) sun.style.display = 'none';
                     } else { 
                         body.setAttribute('data-theme', 'dark'); 
                         updateChartTheme(true); 
                         if(moon) moon.style.display = 'none';
-                        if(sun) sun.style.display = 'inline-block';
+                        if(sun) sun.style.display = 'block';
                     }
                 });
             }
@@ -1921,6 +1898,39 @@
         import { OrbitControls } from 'https://cdn.skypack.dev/three@0.128.0/examples/jsm/controls/OrbitControls.js';
         import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
         
+        // --- Initialize Mini Chart Safely inside DOMContentLoaded to Ensure Window Access ---
+        document.addEventListener("DOMContentLoaded", () => {
+            if(typeof Chart !== 'undefined' && document.getElementById('miniChart')) {
+                const miniCtx = document.getElementById('miniChart').getContext('2d');
+                let gradient = miniCtx.createLinearGradient(0, 0, 0, 200);
+                gradient.addColorStop(0, 'rgba(0,102,204,0.4)');
+                gradient.addColorStop(1, 'rgba(0,102,204,0.0)');
+
+                window.growthChartAxis = new Chart(miniCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026'],
+                        datasets: [{ 
+                            label: 'Proficiency %', 
+                            data: [0,0,0,0,0,0,0,0], 
+                            borderColor: '#0066cc', 
+                            tension: 0.4, 
+                            fill: true, 
+                            backgroundColor: gradient, 
+                            pointRadius: 0, 
+                            pointHoverRadius: 6,
+                            borderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: { x: { display: false }, y: { min: 0, max: 100, display: false } },
+                        plugins: { legend: { display: false }, tooltip: { enabled: false } }
+                    }
+                });
+            }
+        });
+
         // --- 1. The Expertise Axis Section ---
         const combContainer = document.getElementById('canvas-container');
         if(combContainer) {
@@ -1936,7 +1946,6 @@
             const combControls = new OrbitControls(combCamera, combRenderer.domElement);
             combControls.enableDamping = true;
             
-            // Explicitly locking scroll wheel unless SHIFT is held
             combControls.enableZoom = false; 
             window.addEventListener('keydown', (e) => { if(e.key === 'Shift') combControls.enableZoom = true; });
             window.addEventListener('keyup', (e) => { if(e.key === 'Shift') combControls.enableZoom = false; });
@@ -2112,6 +2121,75 @@
                 }
             });
         }
+
+        // --- 2. The 3D Gyroid Model for IIT Madras Timeline ---
+        function initGyroid() {
+            const gyroidContainer = document.getElementById('gyroid-canvas-container');
+            if(!gyroidContainer) return;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, gyroidContainer.clientWidth / gyroidContainer.clientHeight || 1, 0.1, 100);
+            camera.position.set(0, 0, 5);
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(gyroidContainer.clientWidth || 340, gyroidContainer.clientHeight || 180);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            gyroidContainer.appendChild(renderer.domElement);
+
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 2.0;
+            controls.enableZoom = true;
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(10, 20, 10);
+            scene.add(dirLight);
+            const rimLight = new THREE.DirectionalLight(0xbf5af2, 0.6); 
+            rimLight.position.set(-10, -10, -10);
+            scene.add(rimLight);
+
+            const loader = new GLTFLoader();
+            loader.load('assets/gyroid.glb', (gltf) => {
+                const model = gltf.scene;
+                
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scale = 3 / maxDim;
+                model.scale.setScalar(scale);
+                model.position.sub(center.multiplyScalar(scale));
+
+                scene.add(model);
+            }, undefined, (error) => {
+                // Fallback geometry just in case the GLB file is missing
+                console.warn("Gyroid GLB not found, loading fallback.");
+                const fallbackGeo = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
+                const fallbackMat = new THREE.MeshStandardMaterial({color: 0x0066cc, roughness: 0.2, metalness: 0.8});
+                scene.add(new THREE.Mesh(fallbackGeo, fallbackMat));
+            });
+
+            function animateGyroid() {
+                requestAnimationFrame(animateGyroid);
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animateGyroid();
+
+            const resizeObserver = new ResizeObserver(() => {
+                if(gyroidContainer.clientWidth > 0 && gyroidContainer.clientHeight > 0) {
+                    camera.aspect = gyroidContainer.clientWidth / gyroidContainer.clientHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(gyroidContainer.clientWidth, gyroidContainer.clientHeight);
+                }
+            });
+            resizeObserver.observe(gyroidContainer);
+        }
+        
+        setTimeout(initGyroid, 500);
     </script>
 </body>
 </html>
